@@ -1,6 +1,13 @@
-# Felucca
+# OPQuencer
 
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
+
+**OPQuencer v0.1.0** is a custom firmware for the M-VAVE FM-1, based on
+[Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments):
+everything Felucca does, plus **MIDI OUT of the sequencer, the arpeggiator and ratchets** over USB,
+with a **TX channel per track** — drive any MIDI-CV converter (eurorack), drum machine or DAW straight
+from the FM-1's four tracks. See [OPQuencer M0](#opquencer-m0) below. The Felucca documentation that
+follows still applies; where it says "Felucca", the device now says "OPQuencer".
 
 ![Felucca 1.0](docs/felucca-1.0.png)
 
@@ -13,7 +20,23 @@ projects saved by 1.4 or later do not open on 1.1.5.x. Going back from 1.5.x to 
 [Try it in your browser](https://hugelton.github.io/Felucca/webapp/try/), no FM-1 needed.
 
 Multi-engine synthesizer firmware for the M-VAVE FM-1. Please report what you find in
-[Issues](https://github.com/hugelton/Felucca/issues).
+[Issues](https://github.com/andrixb/OPQuencer/issues).
+
+## OPQuencer M0
+
+MIDI OUT for eurorack (any USB-host MIDI-CV converter: Expert Sleepers FH-2, Endorphin Shuttle Control,
+or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
+
+- **MENU > MIDI > MIDI OUT:** KEYS (live keys only, as before) or SEQ (the sequencer's notes at their
+  step velocity, drum hits with accent at 127, the arpeggiator, ratchet parts retriggered). A slide into
+  the same note stays one MIDI note; STOP, a panic, a song section change or back to KEYS ends every
+  hanging note. MIDI IN is never echoed. STEP PREVIEW's audition sounds locally only.
+- **MENU > MIDI > TX T1..T4:** each track's OUT channel: FOLLOW (the ROUTE block, as before), a fixed
+  1..16, or OFF (nothing sent, the track still plays internally). The mode and the channels are the
+  project's, like MIDI IN. The USB MIDI port is named "OPQuencer".
+- The update path, package identity, project/preset formats and editor protocol are unchanged from
+  Felucca 1.5.1: projects, backups and the web editor carry over (the editor shows the new OUT mode
+  under its globals; TX channels are menu-only for now).
 
 - Install: [web installer](https://hugelton.github.io/Felucca/) (Chrome or Edge, USB), or `tools/fm1_install.py` from a terminal
 - Try: [Felucca in your browser](https://hugelton.github.io/Felucca/webapp/try/): the same firmware compiled to

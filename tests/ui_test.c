@@ -1649,12 +1649,12 @@ static int test_menu_tabs(void)
             }
     }
     ui_prefs = 0;
-    bad += check("MENU tabs: DISPLAY CONTROL AUDIO MIDI SYSTEM (8 7 6 2 5 rows), 1..8 each in a run, fit the page; tab gaps "
+    bad += check("MENU tabs: DISPLAY CONTROL AUDIO MIDI SYSTEM (8 7 6 7 6 rows), 1..8 each in a run, fit the page; tab gaps "
                  "constant (S, LARGE)",
                  ok && MTAB_COUNT == 5u && str_eq(MTAB_NAME[0], "DISPLAY") && str_eq(MTAB_NAME[MTAB_MIDI], "MIDI") &&
                  mtab_rows(MTAB_DISPLAY) == 8u && MI_TAB[MI_HOME] == MTAB_DISPLAY && mtab_rows(MTAB_CONTROL) == 7u && mtab_rows(MTAB_AUDIO) == 6u &&
-                 mtab_rows(MTAB_MIDI) == 2u && MI_TAB[MI_LCLEAR] == MTAB_MIDI && mtab_rows(MTAB_SYSTEM) == 6u && MI_TAB[MI_TUNE] == MTAB_AUDIO &&   /* (1.5: LEARN CLEAR, HELP) */
-                 MI_TAB[MI_MIDIIN] == MTAB_MIDI && MI_TAB[MI_INFO] == MTAB_SYSTEM && MI_INFO >= MI_VALUES);
+                 mtab_rows(MTAB_MIDI) == 7u && MI_TAB[MI_LCLEAR] == MTAB_MIDI && mtab_rows(MTAB_SYSTEM) == 6u && MI_TAB[MI_TUNE] == MTAB_AUDIO &&   /* (OPQuencer M0: MIDI OUT, TX T1..T4) */
+                 MI_TAB[MI_MIDIIN] == MTAB_MIDI && MI_TAB[MI_MIDIOUT] == MTAB_MIDI && MI_TAB[MI_TXCH1] == MTAB_MIDI && MI_TAB[MI_TXCH4] == MTAB_MIDI && MI_TAB[MI_INFO] == MTAB_SYSTEM && MI_INFO >= MI_VALUES);
 
     ui_power_on();
     hold(B_HOME);
@@ -1669,7 +1669,9 @@ static int test_menu_tabs(void)
     turn(EN_PRESET, 1); turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_LATCH;
     turn(EN_ALGO, 1); ok &= ui.menu_sel == MI_LOWCUT && menu_tab() == MTAB_AUDIO;
     turn(EN_ALGO, 1); ok &= ui.menu_sel == MI_MIDIIN && menu_tab() == MTAB_MIDI;   /* (1.2) */
-    turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_LCLEAR;  /* (1.5: LEARN CLEAR, then round) */
+    turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_MIDIOUT;  /* (OPQuencer M0: MIDI OUT, TX T1..T4, LEARN CLEAR, then round) */
+    turn(EN_PRESET, 1); turn(EN_PRESET, 1); turn(EN_PRESET, 1); turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_TXCH4;
+    turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_LCLEAR;
     turn(EN_PRESET, 1); ok &= ui.menu_sel == MI_MIDIIN;
     turn(EN_ALGO, 1); ok &= ui.menu_sel == MI_SERIAL && menu_tab() == MTAB_SYSTEM;
     turn(EN_ALGO, -1); turn(EN_ALGO, -1); ok &= ui.menu_sel == MI_LOWCUT;
@@ -1730,6 +1732,7 @@ static int test_menu_tabs(void)
     ui_prefs = 0; settings_hold = HOLD_DEF; settings_leds = LEDS_DIM; ui_style = ST_FLAT;
     settings.lowcut = 0; fx_lowcut = 0; menu_put(MI_COLOR, UI_GREY_INDEX);
     song.g[G_TUNE] = 0; song.g[G_ROUTE] = 0;
+    song.g[G_MIDI] = 0; song.g[G_DRLVL] = 0; song.g[G_DRREV] = 0;   /* (OPQuencer M0: OUT KEYS, TX FOLLOW) */
     bad += check("MENU: OCT+ / OCT- step every value row up / down (COLOR wraps, the rest stop), the menu stays", ok);
     {   /* the ON / OFF rows: up (a knob right, OCT+) is ON, the switch's knob to the right, whichever bit it is */
         static const uint8_t SW[] = {MI_LARGE, MI_ANIM, MI_ACCEL, MI_LATCH, MI_BPMLOCK, MI_SERIAL, MI_RESTORE};
@@ -1897,11 +1900,10 @@ static int test_information(void)
     press(B_OCTUP);
     ui_draw();
     bad += check("ABOUT opens one document with scrollable license text and credits", ui.menu == 2 && !ui.menu_scroll && menu_scroll_max() > MENU_DOC_H);
-    for (y = 146; y < 220; y++)
-        for (x = 158; x < 232; x++)
-            if (x < 166 || x >= 224 || y < 154 || y >= 212)
-                quiet &= host_screen[y * 240 + x] == swap16(UI_QR_LIGHT);
-    bad += check("ABOUT QR keeps its complete white quiet zone above the fixed footer", quiet);
+    for (y = 0; y < 240; y++)                            /* OPQuencer: no QR anywhere on ABOUT (no stale code) */
+        for (x = 0; x < 240; x++)
+            quiet &= host_screen[y * 240 + x] != swap16(UI_QR_DARK);
+    bad += check("ABOUT shows no QR code", quiet);
     memcpy(header, host_screen, sizeof header);
     memcpy(footer, host_screen + 221 * 240, sizeof footer);
     turn(EN_PRESET, 3);
@@ -8112,7 +8114,8 @@ static int test_large(void)
 static int test_menu_prefs(void)
 {
     int bad = 0, ok = 1;
-    uint32_t k, j, seen = 0;
+    uint32_t k, j;
+    uint64_t seen = 0;                               /* (OPQuencer M0: MI_COUNT past 32 rows needs 64 bits) */
     static uint16_t shot[MTAB_COUNT][240 * 240];
     ui_power_on();
     ui_prefs = 0;
@@ -8121,7 +8124,7 @@ static int test_menu_prefs(void)
     for (k = 0; k < MTAB_COUNT; k++) {              /* ALGORITHM right through the tabs, PRESETS through each one's rows */
         ok &= menu_tab() == k && ui.menu_sel == mtab_first(k);
         for (j = 0; j < mtab_rows(k); j++) {
-            seen |= 1u << ui.menu_sel;
+            seen |= 1ULL << ui.menu_sel;
             turn(EN_PRESET, 1);
         }
         ok &= ui.menu_sel == mtab_first(k);         /* (round the tab, back at its first row) */
@@ -8130,7 +8133,7 @@ static int test_menu_prefs(void)
         for (j = 0; j < k; j++) ok &= memcmp(shot[j], shot[k], sizeof shot[k]) != 0;
         turn(EN_ALGO, 1);
     }
-    ok &= seen == (1u << MI_COUNT) - 1u && ui.menu_sel == 0u;
+    ok &= seen == (1ULL << MI_COUNT) - 1u && ui.menu_sel == 0u;
     bad += check("MENU: ALGORITHM and PRESETS reach every row, each tab a page of its own", ok);
     /* ANIM */
     ui.menu_sel = MI_ANIM;

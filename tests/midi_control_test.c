@@ -544,7 +544,9 @@ static int learn_test(void)
 
     /* MENU > MIDI > LEARN CLEAR (1.5): OCT+ clears every learned CC */
     hold(B_HOME);
-    turn(EN_ALGO, 1); turn(EN_ALGO, 1); turn(EN_ALGO, 1); turn(EN_PRESET, 1);
+    turn(EN_ALGO, 1); turn(EN_ALGO, 1); turn(EN_ALGO, 1);
+    turn(EN_PRESET, 1); turn(EN_PRESET, 1); turn(EN_PRESET, 1);   /* MIDI IN, MIDI OUT, TX T1..T4 (OPQuencer M0) */
+    turn(EN_PRESET, 1); turn(EN_PRESET, 1); turn(EN_PRESET, 1);
     ok = ui.menu == 1 && ui.menu_sel == MI_LCLEAR && menu_tab() == MTAB_MIDI && str_eq(MI_NAME[MI_LCLEAR], "LEARN CLEAR") &&
          ml_count() == ML_N && oct_leds() == OCT_BREATH && !menu_valued(MI_LCLEAR) && menu_valued(MI_MIDIIN);
     turn(EN_K1, 3); press(B_OCTDN);

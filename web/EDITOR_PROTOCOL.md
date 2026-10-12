@@ -160,7 +160,9 @@ sets them back to 127, user presets and projects store them (older ones load at 
 Other enums that grew: `P_SDIV` (DIV, id 30) has 10 names (1/4, 1/8, 1/16, 1/32, 8T, 16T, 1/2, 1/1, 2BAR,
 4BAR; the first six keep their numbers), `P_AMODE` (id 17) 15 (OFF, UP, DN, UPDN, RND, ORD, REPEAT, and since 1.2 DNUP, UP+8, CONV, DIVG, PINKY, THUMB, WALK,
 CHORD: values 7..14, appended; an editor that knows only 7 names shows the value by `DESC`'s name) and the
-global `G_CLOCK` (id 2, label "CLK") 3 (INT, USB, TRS). `G_MIDI` (id 12) is an enum of USB / TRS that nothing reads.
+global `G_CLOCK` (id 2, label "CLK") 3 (INT, USB, TRS). `G_MIDI` (id 12, OPQuencer M0, label "OUT")
+is the MIDI OUT mode: 0 "KEYS" (live keys only, as before), 1 "SEQ" (the sequencer, the arp and ratchets
+go out too, on each track's TX channel); MENU > MIDI > MIDI OUT. Every older value (0) plays as before.
 Since 1.5.1 the delay's `G_DTIME` (global id 4, label "TIME") has 13 names: P_SDIV's ten at the same values, then
 1/8D, 1/16D, 1/4D (values 10..12, dotted: 3/4, 3/8, 3/2 of a quarter); `DESC` sends all 13, max 12. P_SDIV, P_ARATE
 and the LFO's SYNC keep their lists. The device's knob steps TIME by length, longest first (4BAR 2BAR 1/1 1/2 1/4D
@@ -404,8 +406,10 @@ grid lives in the steps themselves, so every engine has it:
   NENGINES, no presets (`UP_LOAD` / `UP_STORE` rc 1), its level the global `G_DRLVL`. Drums are now the
   DRUM engine on any part: the first C key is the kick (C2 = 36), notes are GM numbers.
 - The globals `G_DRCH`, `G_DRLVL`, `G_DRREV` (ids 24..26: the old drum track's MIDI channel, level and
-  reverb send) keep their ids, and `G_COUNT` stays 27. `G_DRLVL` and `G_DRREV` are inert: `DESC` gives
-  label "-", range 0..0, and no page shows them. Id 24 (`G_DRCH`, never read since 1.0) is `G_RTYPE`
+  reverb send) keep their ids, and `G_COUNT` stays 27. `G_DRLVL` and `G_DRREV` pack the OPQuencer M0 TX
+  channels (MENU > MIDI > TX T1..T4): T1+T2 / T3+T4 in the low / high byte, each 0 FOLLOW the ROUTE block
+  (as before), 1..16 a fixed channel, 17 OFF; `DESC` gives label "-", range 0..0x1111, and no page shows
+  them (out-of-range bytes read as FOLLOW). Id 24 (`G_DRCH`, never read since 1.0) is `G_RTYPE`
   since 1.0: the reverb's model, `DESC` label "TYPE", enum ROOM (0) / SPRING (1) / HALL (2, since 1.2), on the
   REVERB page (FX). The power-on value (`DESC` def) is HALL since 1.2, ROOM before; a project keeps its own, and
   projects of formats before FUN7 load it as ROOM. MIDI channel 10 is no longer special (channels 1..4 play
@@ -449,7 +453,7 @@ grid lives in the steps themselves, so every engine has it:
   (about 10 ms each); with the next piece sent before the reply, every second piece was dropped.
 - **Following the device.** With v2 firmware, `WATCH` and `PING` (above). Older firmware pushes
   nothing (no reply to `PING`): poll `DUMP` about every 300–500 ms while the page is visible.
-- **Port.** The device's MIDI port is named "Felucca" (USB 1209:0001). Updates use the same
+- **Port.** The device's MIDI port is named "OPQuencer" (USB 1209:0001; "Felucca" before OPQuencer M0). Updates use the same
   port with other SysEx (the `F0 22 24 35 …` keys, `00 59 …` frames); never send those
   from the editor. Since 1.0 the same USB device also has an audio input ("Felucca",
   44.1 kHz stereo; bcdDevice 3.11; since 1.1 44.1 or 48 kHz, the host's choice, bcdDevice 3.21
@@ -461,7 +465,8 @@ grid lives in the steps themselves, so every engine has it:
   before. Until 1.0.2 every other channel played the selected track; since 1.0.3 channels 5..16 are
   ignored: notes, bend, CCs, aftertouch, panic and reset), 1 "SEL" (every channel → the selected track); since 1.2
   (append-only) 2 "CH5-8", 3 "CH9-12", 4 "CH13-16": channels 5..8, 9..12 or 13..16 → tracks 1..4, the others
-  ignored as with CH1-4, and the keys' MIDI out on the track's channel of that block. `DESC` of id 14 gives range
+  ignored as with CH1-4, and the keys' MIDI out on the track's channel of that block (OPQuencer M0: or its
+  TX channel with TX T1..T4 set, MENU > MIDI; TX OFF sends nothing). `DESC` of id 14 gives range
   0..4 and the five names; firmware before 1.2 clamps 2..4 to 1 (SEL) when it loads such a project.
   Neither setting affects this SysEx protocol or MIDI clock. The
   id, `G_COUNT` (27) and the project format are unchanged; it is saved and loaded with the project like

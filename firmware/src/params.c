@@ -47,7 +47,12 @@ static const char *const N_PRIO[] = {"LAST", "LOW", "HIGH"};
 static const char *const N_ALLOC[] = {"ROT", "REUSE"};
 static const char *const N_ORDER[] = {"NOTE", "PLAY"};
 static const char *const N_CLOCK[] = {"INT", "USB", "TRS"};
-static const char *const N_MIDI_INPUT[] = {"USB", "TRS"};
+/* OPQuencer M0: MIDI OUT (G_MIDI, MENU > MIDI > OUT) and the tracks' TX channels (G_DRLVL / G_DRREV,
+ * MENU > MIDI > TX T1..T4, core.h tx_raw). Append-only: KEYS / FOLLOW first, the stored 0 of every
+ * older project means as before */
+static const char *const N_MOUT[] = {"KEYS", "SEQ"};
+static const char *const N_TXCH[] = {"FOLLOW", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+                                     "13", "14", "15", "16", "OFF"};
 /* MIDI IN (seq.c midi_base): 1..4 -> parts, 5..16 ignored / all -> selected / (1.2, append-only) 5..8, 9..12, 13..16 -> parts */
 static const char *const N_ROUTE[] = {"CH1-4", "SEL", "CH5-8", "CH9-12", "CH13-16"};
 static const char *const N_NOTE[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
@@ -194,10 +199,12 @@ static const param_desc_t GP[G_COUNT] = {
     [G_RDAMP] = PD("DAMP", F_PCT, 0, 127, 60),
     [G_CRATE] = PD("CRT", F_LFOHZ, 0, 127, 40),
     [G_CDEPTH] = PD("CDP", F_PCT, 0, 127, 60),
-    /* G_MIDI, G_SYNC, G_INFO: the old SYSTEM page's (gone in 1.2), on no page: MIDI's value was never read (its card
-     * showed the USB state), SYNC was a placeholder, CPU a reading; the USB state and the CPU load are MENU > SYSTEM >
-     * INFO's now (ui_menu.c). Kept: the ids and G_COUNT are fixed by the formats and the protocol */
-    [G_MIDI] = PE("MIDI", N_MIDI_INPUT, 0),
+    /* G_MIDI (OPQuencer M0): MIDI OUT's mode, MENU > MIDI > OUT. The old SYSTEM page's card showed the
+     * USB state and its value was never read; 0 KEYS (live keys only, as before) keeps every older project as
+     * it was, 1 SEQ sends the sequencer, the arp and ratchets too (seq.c). SYNC was a placeholder, CPU a
+     * reading; the USB state and the CPU load are MENU > SYSTEM > INFO's now (ui_menu.c). Kept: the ids and
+     * G_COUNT are fixed by the formats and the protocol */
+    [G_MIDI] = PE("OUT", N_MOUT, 0),
     [G_SYNC] = PE("SYNC", N_DASH, 0),
     /* MIDI IN's routing, edited on MENU > MIDI > MIDI IN (1.2: menu_items.c MI_MIDIIN; up to 1.1.5 GLO > SYSTEM ROUT),
      * stored with the project as before. (was "--": stored 0 = CH1-4, as MIDI IN always was) */
@@ -213,11 +220,13 @@ static const param_desc_t GP[G_COUNT] = {
     [G_INITSND] = PE("INIT", N_GO, 0),
     /* the reverb's model on the REVERB page: the id of the old GM drum channel (G_DRCH, inert since 1.0) */
     [G_RTYPE] = PE("TYPE", N_RTYPE, 2),         /* HALL at power-on since 1.2 (ROOM before; projects keep theirs) */
-    /* inert: they set the GM drum part (level, reverb send), which is gone (drums are the DRUM engine
+    /* inert since 1.0 (OPQuencer M0: they pack the TX channels, core.h tx_raw): they set the GM drum part
+     * (level, reverb send), which is gone (drums are the DRUM engine
      * on any part). On no page; kept so the ids and G_COUNT, which the project format and the
-     * editor protocol depend on, do not move */
-    [G_DRLVL] = PD("-", F_INT, 0, 0, 0),
-    [G_DRREV] = PD("-", F_INT, 0, 0, 0),
+     * editor protocol depend on, do not move. The range spans the packed bytes (each 0..17, TX_FOLLOW..TX_OFF);
+     * project.c clamps loads to it, so every older value (0) stays */
+    [G_DRLVL] = PD("-", F_INT, 0, 0x1111, 0),
+    [G_DRREV] = PD("-", F_INT, 0, 0x1111, 0),
 };
 
 static const param_desc_t *track_desc(const track_t *t, uint32_t id)

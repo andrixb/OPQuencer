@@ -64,6 +64,74 @@ static int32_t midi_base(void)
 /* MIDI channel 0..15 of track i (keys -> MIDI out): its channel in ROUT's block (SEL, CH1-4: 1..4) */
 static uint32_t trk_midi_ch(uint32_t i) { return (midi_base() > 0 ? (uint32_t)midi_base() : 0u) + i % NTRK; }
 
+/* OPQuencer M0: MIDI OUT of the sequencer, the arp and ratchets (G_MIDI SEQ; the keys always go out:
+ * key_on / key_off). A track's OUT channel is its TX channel (core.h tx_raw: a fixed one, FOLLOW's
+ * ROUTE block as before, 0xFF with TX OFF: nothing). Notes from USB / TRS IN are never echoed (no MIDI
+ * loop). A set per track of the notes sent out, so a note ends once, on the channel it went out on
+ * whatever TX says now, and STOP, a panic or MIDI OUT back to KEYS end them all */
+static uint32_t tx_midi_ch(uint32_t i)   /* OUT channel of track i, 0xFF = TX OFF */
+{
+    uint32_t r = tx_raw(i);
+    if (r == TX_OFF)
+        return 0xFFu;
+    if (r >= 1u && r <= 16u)
+        return r - 1u;
+    return trk_midi_ch(i);                           /* FOLLOW: the ROUTE block, as before */
+}
+/* a note on (vel > 0) / off to MIDI OUT on channel ch (0xFF: the track's TX OFF: nothing) */
+static void midi_out_note(uint32_t ch, uint32_t note, uint32_t vel)
+{
+    if (ch > 15u || note > 127u)
+        return;
+    midi_out_event(vel ? 0x09u | (0x90u | ch) << 8 | (note & 127u) << 16 | (vel & 127u) << 24
+                       : 0x08u | (0x80u | ch) << 8 | (note & 127u) << 16);
+}
+static uint32_t mo_set[NTRK][4];
+static uint8_t mo_ch[NTRK];                /* the channel the notes of mo_set went out on: their note-offs too */
+static uint8_t mo_any;                     /* something was sent out since the last check (events_block) */
+static uint8_t seq_quiet;                  /* STEP PREVIEW's audition: it sounds locally only */
+static void seq_out_off(const track_t *t, uint32_t note)
+{
+    uint32_t i = trk_index(t) % NTRK;
+    if (seq_quiet || note > 127u || !(mo_set[i][note >> 5] & (1u << (note & 31u))))
+        return;
+    mo_set[i][note >> 5] &= ~(1u << (note & 31u));
+    midi_out_note(mo_ch[i], note, 0);
+}
+static void seq_out_track_off(const track_t *t);
+static void seq_out_on(const track_t *t, uint32_t note, uint32_t vel)
+{
+    uint32_t i = trk_index(t) % NTRK;
+    if (!song.g[G_MIDI] || seq_quiet || note > 127u)
+        return;
+    seq_out_off(t, note);                      /* played again while out: off first (a ratchet's parts) */
+    if (tx_midi_ch(i) != mo_ch[i]) {           /* (its channel changed: what is out ends where it started) */
+        seq_out_track_off(t);
+        mo_ch[i] = (uint8_t)tx_midi_ch(i);
+    }
+    if (mo_ch[i] > 15u)
+        return;                                /* (TX OFF: nothing goes out, nothing to end) */
+    mo_set[i][note >> 5] |= 1u << (note & 31u);
+    mo_any = 1;
+    midi_out_note(mo_ch[i], note, vel ? vel & 127u : 1u);
+}
+static void seq_out_track_off(const track_t *t)      /* every note of the track still out */
+{
+    uint32_t i = trk_index(t) % NTRK, w, b;
+    for (w = 0; w < 4u; w++)
+        for (b = 0; mo_set[i][w]; b++)
+            if (mo_set[i][w] & (1u << b)) {
+                mo_set[i][w] &= ~(1u << b);
+                midi_out_note(mo_ch[i], w * 32u + b, 0);
+            }
+}
+static void seq_out_all_off(void)
+{
+    uint32_t i;
+    for (i = 0; i < NTRK; i++)
+        seq_out_track_off(&trk[i]);
+}
+
 static int drum_track(const track_t *t) { return ENGINES[eng_idx(t->eng_req)] == &ENG_DRUM; }
 
 /* the 27 keys from F: black or white, and the key's place among the keys of its colour (white 0..15, black
@@ -255,11 +323,17 @@ static __attribute__((noinline)) void arp_chord(track_t *t, const uint32_t *list
         if (rec_on(t))
             rec_note(t, nt, 100);
         trk_note_on(t, nt, 100);
+        seq_out_on(t, nt, 100);
     }
 }
 
 static void arp_silence(track_t *t)              /* the sounding arp note(s) end */
 {
+    uint32_t i;
+    for (i = 0; i < 3u; i++)                       /* (before arp_chord_off: it forgets the notes) */
+        if (t->arp_ch[i])
+            seq_out_off(t, t->arp_ch[i]);
+    seq_out_off(t, t->arp_note);
     if (t->arp_ch[0] | t->arp_ch[1] | t->arp_ch[2])
         arp_chord_off(t, 0);
     trk_note_off(t, t->arp_note);
@@ -268,6 +342,11 @@ static void arp_silence(track_t *t)              /* the sounding arp note(s) end
 
 static void arp_off(track_t *t)                  /* the sounding arp note(s) end (a recorded one too) */
 {
+    uint32_t i;
+    for (i = 0; i < 3u; i++)                       /* (before arp_chord_off: it forgets the notes) */
+        if (t->arp_ch[i])
+            seq_out_off(t, t->arp_ch[i]);
+    seq_out_off(t, t->arp_note);
     if (t->arp_ch[0] | t->arp_ch[1] | t->arp_ch[2])
         arp_chord_off(t, rec_on(t));
     trk_note_off(t, t->arp_note);
@@ -410,6 +489,7 @@ static __attribute__((noinline)) void arp_fire(track_t *t, uint32_t period)
         if (rec_on(t))
             rec_note(t, t->arp_note, 100);           /* recording: what the arp plays */
         trk_note_on(t, t->arp_note, 100);
+        seq_out_on(t, t->arp_note, 100);
     }
 }
 
@@ -698,7 +778,7 @@ static __attribute__((noinline)) void perf_key_remap(void)
  * holds already sounds: it is not started again (nor sent to MIDI OUT); the key keeps its notes */
 static void key_on(uint32_t k, track_t *t)
 {
-    uint32_t n = chord_build(t, kb_note[k], kb_chord[k]), i, mc = trk_midi_ch(trk_index(t));
+    uint32_t n = chord_build(t, kb_note[k], kb_chord[k]), i, mc = tx_midi_ch(trk_index(t));
     kb_chn[k] = 0;
     in_key = (uint8_t)(k + 1u);                     /* (the arp keeps the key: arp_add) */
     for (i = 0; i < n; i++) {
@@ -706,7 +786,7 @@ static void key_on(uint32_t k, track_t *t)
         if (midi_local_held(t, x))
             continue;
         input_on(t, x, 100);
-        midi_out_event(0x09u | (0x90u | mc) << 8 | x << 16 | 100u << 24);
+        midi_out_note(mc, x, 100);                  /* (TX OFF: nothing; the keys always go out) */
     }
     in_key = 0;
     kb_chn[k] = (uint8_t)n;
@@ -716,14 +796,14 @@ static void key_on(uint32_t k, track_t *t)
 /* key k is up: the notes it started end, but those another key still holds */
 static void key_off(uint32_t k, track_t *t)
 {
-    uint32_t n = kb_chn[k], i, mc = trk_midi_ch(trk_index(t));
+    uint32_t n = kb_chn[k], i, mc = tx_midi_ch(trk_index(t));
     kb_chn[k] = 0;
     for (i = 0; i < n; i++) {
         uint32_t x = kb_chord[k][i];
         if (midi_local_held(t, x))
             continue;
         input_off(t, x);
-        midi_out_event(0x08u | (0x80u | mc) << 8 | x << 16);
+        midi_out_note(mc, x, 0);
     }
 }
 
@@ -835,8 +915,10 @@ static void seq_start(void)
 static void seq_release(track_t *t)
 {
     uint32_t i;
-    for (i = 0; i < t->seq_n; i++)
+    for (i = 0; i < t->seq_n; i++) {
         trk_note_off(t, t->seq_notes[i]);
+        seq_out_off(t, t->seq_notes[i]);
+    }
     t->seq_n = 0;
     t->seq_hold = 0;
     t->slide_glide = 0;                             /* live MONO / LEG keys must not glide after it */
@@ -937,15 +1019,22 @@ static __attribute__((noinline)) void seq_step(track_t *t, const step_t *s, uint
     t->slide_glide = (uint8_t)slide_in;
     if (!slide_in)
         seq_release(t);
-    for (i = 0; i < m; i++)
-        if (!((sk >> i) & 1u))
-            trk_note_on(t, nn[i], vv[i]);
+    for (i = 0; i < m; i++) {
+        if (((sk >> i) & 1u))
+            continue;
+        trk_note_on(t, nn[i], vv[i]);
+        /* a slide into the same note: one MIDI note (no retrigger on the converter's envelope) */
+        if (!slide_in || !(mo_set[trk_index(t) % NTRK][nn[i] >> 5] & (1u << (nn[i] & 31u))))
+            seq_out_on(t, nn[i], vv[i]);
+    }
     if (slide_in)                                   /* release what is not held over */
         for (i = 0; i < t->seq_n; i++) {
             for (j = 0; j < m && nn[j] != t->seq_notes[i]; j++)
                 ;
-            if (j == m)
+            if (j == m) {
                 trk_note_off(t, t->seq_notes[i]);
+                seq_out_off(t, t->seq_notes[i]);
+            }
         }
     t->seq_n = 0;
     for (i = 0; i < m; i++)
@@ -972,7 +1061,9 @@ static __attribute__((noinline)) void seq_audition(void)
     t = &trk[i];
     at = t->seq_idx;
     t->seq_idx = (uint16_t)idx;
+    seq_quiet = 1;                                    /* a preview sounds locally only, never to MIDI OUT */
     seq_step(t, &t->step[idx], idx, div_samples(2), SEQ_ROLLED);
+    seq_quiet = 0;
     t->seq_idx = at;
     t->seq_hold = 0;
     t->rat_left = 0;
@@ -1236,6 +1327,10 @@ static void events_block(uint32_t n)
         if (midi_route != 1u)
             midi_route_block();
     }
+    if (mo_any && !song.g[G_MIDI]) {                  /* MIDI OUT back to KEYS: end what SEQ had sent */
+        seq_out_all_off();
+        mo_any = 0;
+    }
     pr = panic_req;
     panic_req = 0;
     if (midi_in_overflow) {                            /* a lost note-off must never leave a held note */
@@ -1261,6 +1356,7 @@ static void events_block(uint32_t n)
             t->nheld = 0;
             t->arp_phys = 0;
             arp_forget(t);
+            seq_out_track_off(t);                     /* (a panic ends the track's MIDI OUT notes too) */
         }
         engine_block(t);                              /* engine switch: fade, then switch (voice.c) */
         /* ARP turned off, or HOLD released with no key down: drop the latched chord */

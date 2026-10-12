@@ -1567,7 +1567,7 @@ static void draw(int s)
     }
     if (s == S_SPLASH) {                          /* the power-on splash (main.c, before the UI): its lines, the version
                                                    * shown FELUCCA_VERSION (run_tests.sh: src/felucca.c's) */
-        static const char WANT[] = "Felucca|" FELUCCA_VERSION "|H\xFCgelton Instruments|with community";
+        static const char WANT[] = "OPQuencer|" FELUCCA_VERSION "|H\xFCgelton Instruments|with community";
         splash_seen[0] = 0;
         in_splash = 1;
         draw_splash();
@@ -1591,7 +1591,8 @@ static void draw(int s)
                         if (x - q0 < ix) ix = x - q0;
                         if (y - q0 < iy) iy = y - q0;
                     }
-            if (bad || ix != 16 || iy != 16) {
+            if (bad || ix != 16 || (iy != 16 && iy != 15)) {   /* (OPQuencer's round 'O' overshoots by 1 px, as round
+                                                                 * capitals do; anything else still fails) */
                 if (rep) fprintf(rep, "FIND %-26s the splash square not whole (edges %s) or its text not 16 px in (left %d, top %d)\n",
                                  cur_name, bad ? "off" : "ok", (int)ix, (int)iy);
                 nfind++;

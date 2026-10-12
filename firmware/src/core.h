@@ -409,6 +409,30 @@ static inline uint32_t swing_step_len(const track_t *t, uint32_t base, uint32_t 
     return base + (uint32_t)((idx & 1u) ? -sw : sw);
 }
 
+/* OPQuencer M0: MIDI OUT to any MIDI-CV converter (eurorack) or DAW, over USB (seq.c).
+ * G_MIDI is the OUT mode (MOUT_KEYS: live keys only, as before; MOUT_SEQ: the sequencer, the arp
+ * and ratchets go out too). G_DRLVL / G_DRREV pack the four tracks' TX channels, one byte each
+ * (T1 T2 in G_DRLVL's low / high byte, T3 T4 in G_DRREV's): TX_FOLLOW (0) the ROUTE block's channel
+ * as before, 1..16 a fixed channel, TX_OFF (17) nothing sent. All default 0: exactly as before, no
+ * format change (project.c clamps globals to their descriptors on load; the descriptors span the
+ * packed values, params.c). The OUT mode and the channels are the project's, like ROUTE and TUNE */
+enum { MOUT_KEYS, MOUT_SEQ };
+#define TX_FOLLOW 0u
+#define TX_OFF 17u
+#define TX_PACKED_MAX 0x1111
+static uint32_t tx_raw(uint32_t i)             /* the stored TX value of track i (0..17, else FOLLOW) */
+{
+    int32_t v = i < 2u ? song.g[G_DRLVL] : song.g[G_DRREV];
+    uint32_t b = i & 1u ? (uint32_t)v >> 8 : (uint32_t)v & 0xFFu;
+    return b <= TX_OFF ? b : TX_FOLLOW;
+}
+static void tx_pack(uint32_t i, uint32_t v)    /* store it (menu_items.c; out of range reads as FOLLOW) */
+{
+    int16_t *slot = i < 2u ? &song.g[G_DRLVL] : &song.g[G_DRREV];
+    uint32_t cur = (uint32_t)*slot, b = v <= TX_OFF ? v : TX_FOLLOW;
+    *slot = (int16_t)(i & 1u ? (cur & 0xFFu) | (b << 8) : (cur & 0xFF00u) | b);
+}
+
 /* ----------------------------------------------------------- system --- */
 #define RING_PUBLISH() __asm__ volatile("" ::: "memory")   /* slot store before the index update */
 static volatile uint32_t fm1_ms;  /* milliseconds since boot (TIMER4-based, TIMER5 ISR in main.c) */
