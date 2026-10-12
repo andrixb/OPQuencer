@@ -4,7 +4,7 @@
 
 **OPQuencer v0.2.0** is a custom firmware for the M-VAVE FM-1, a merge of two lineages:
 - [Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments), the
-engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX) 
+engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX)
 — [SLOOP](https://github.com/isod89/sloop-fm1) by isod89, the live-groovebox lineage (SEQ MIDI OUT
 design, per-track MIDI channels), reimplemented here on the Felucca 1.5.1 foundation.
 
