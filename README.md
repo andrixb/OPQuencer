@@ -508,7 +508,7 @@ Upstream: [On AI-Assisted Development and Responsibility](https://github.com/hug
 
 ## Credits
 
-- **OPQuencer** by [Andrix Bley](https://github.com/andrixb): the merge (Felucca 1.5.1 foundation +
+- **OPQuencer** by [Andrea Baldo](https://github.com/andrixb): the merge (Felucca 1.5.1 foundation +
   SLOOP lineage), MIDI OUT (sequencer/arp/ratchets over USB, per-track TX channels, MENU > MIDI rows),
   the OPQuencer identity (splash, ABOUT, USB product string, editor handshake, docs and screenshots),
   and the OPQuencer test suite.
@@ -544,4 +544,4 @@ M-VAVE and FM-1 are trademarks of their respective owners. OPQuencer is not affi
 Felucca is Hügelton Instruments' firmware, likewise unaffiliated with M-VAVE.
 
 Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments (the Felucca base);
-Copyright (C) 2026 Andrix Bley (@andrixb) (the OPQuencer changes: MIDI OUT, identity, docs, tests)
+Copyright (C) 2026 Andrea Baldo (@andrixb) (the OPQuencer changes: MIDI OUT, identity, docs, tests)
