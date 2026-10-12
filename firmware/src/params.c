@@ -48,8 +48,9 @@ static const char *const N_ALLOC[] = {"ROT", "REUSE"};
 static const char *const N_ORDER[] = {"NOTE", "PLAY"};
 static const char *const N_CLOCK[] = {"INT", "USB", "TRS"};
 /* OPQuencer M0: MIDI OUT (G_MIDI, MENU > MIDI > OUT) and the tracks' TX channels (G_DRLVL / G_DRREV,
- * MENU > MIDI > TX T1..T4, core.h tx_raw). Append-only: KEYS / FOLLOW first, the stored 0 of every
- * older project means as before */
+ * MENU > MIDI > TX T1..T4, core.h tx_raw). The OUT mode follows SLOOP's (KEYS / SEQ); the TX channels are
+ * OPQuencer's own (FOLLOW keeps every older project as before). Append-only: KEYS / FOLLOW first, the stored
+ * 0 of every older project means as before */
 static const char *const N_MOUT[] = {"KEYS", "SEQ"};
 static const char *const N_TXCH[] = {"FOLLOW", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
                                      "13", "14", "15", "16", "OFF"};

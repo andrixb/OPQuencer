@@ -95,11 +95,12 @@ static int32_t menu_document(int32_t y, int draw)
         cv_text(6, y + 38, &AF_S, "Multi-engine synthesizer", T_TEXT);
         cv_text(6, y + 58, &AF_M, FELUCCA_VERSION, T_THEME);
         cv_text_r(232, y + 61, &AF_S, __DATE__, T_MID, T_BG);
-        cv_text(6, y + 82, &AF_S, "(C) 2026 Leo Kuroshita", T_TEXT);
-        cv_text(6, y + 100, &AF_S, "H\xFCgelton Instruments", T_TEXT);
-        cv_text(6, y + 118, &AF_S, "GPL-3.0-only", T_TEXT);
-        cv_text(6, y + 138, &AF_S, "github.com", T_MID);
-        cv_text(6, y + 156, &AF_S, "andrixb/OPQuencer", T_MID);
+        cv_text(6, y + 76, &AF_S, "based on Felucca + SLOOP", T_MID);
+        cv_text(6, y + 94, &AF_S, "(C) 2026 Leo Kuroshita", T_TEXT);
+        cv_text(6, y + 112, &AF_S, "H\xFCgelton Instruments", T_TEXT);
+        cv_text(6, y + 130, &AF_S, "GPL-3.0-only", T_TEXT);
+        cv_text(6, y + 150, &AF_S, "github.com", T_MID);
+        cv_text(6, y + 168, &AF_S, "andrixb/OPQuencer", T_MID);
     }
     y = menu_text("CREDITS", y + 216, T_THEME, draw) + 8;
     for (i = 0; i < NELEM(MENU_CREDITS); i++) {

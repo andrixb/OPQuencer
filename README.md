@@ -2,22 +2,28 @@
 
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
 
-**OPQuencer v0.1.0** is a custom firmware for the M-VAVE FM-1, based on
-[Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments):
-everything Felucca does, plus **MIDI OUT of the sequencer, the arpeggiator and ratchets** over USB,
-with a **TX channel per track** — drive any MIDI-CV converter (eurorack), drum machine or DAW straight
-from the FM-1's four tracks. See [OPQuencer M0](#opquencer-m0) below. The Felucca documentation that
+**OPQuencer v0.1.0** is a custom firmware for the M-VAVE FM-1, a merge of two lineages:
+[Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments) — the
+engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX) — and
+[SLOOP](https://github.com/isod89/sloop-fm1) by isod89 — the live-groovebox lineage (SEQ MIDI OUT
+design, per-track MIDI channels), reimplemented here on the Felucca 1.5.1 foundation. The goal is a
+**Teenage Engineering OP-style instrument** (immediate, playful, four tracks like four tape tracks)
+with a **Winter Modular Eloquencer-style sequencer** (controlled chance on every parameter); v0.1.0
+lays the bridge ([MIDI OUT](#opquencer-m0)) so the FM-1 can drive eurorack through any MIDI-CV
+converter. See [Roadmap](#roadmap) for where the two muses go next. The Felucca documentation that
 follows still applies; where it says "Felucca", the device now says "OPQuencer".
 
-![Felucca 1.0](docs/felucca-1.0.png)
+![OPQuencer v0.1.0 (top to bottom, left to right: boot splash, MENU > MIDI with OUT + TX channels, SEQ > DETAIL lanes, ABOUT)](docs/opquencer-0.1.0.png)
 
-**TL;DR:** Felucca 1.5.1 — SEQ > DETAIL for a step's chance, ratchet, nudge and velocity, MIDI Program Change, dotted delay times, REV / ECHO THROW, on top of 1.5's INSERT effects, MIDI LEARN, ANALOG's band-pass and high-pass, ENV SYNC, note lengths and per-step velocity. Connect your FM-1 to a computer by USB,
-open the [web installer](https://hugelton.github.io/Felucca/) in Chrome or Edge, and press Install;
-no extra hardware is needed. Installing is at your own risk: M-VAVE's updater or the installer's
-**Return to official V15** takes you back. Coming from 1.1.5.x? Read [⚠ Coming from 1.1.5](#-coming-from-115) first:
-projects saved by 1.4 or later do not open on 1.1.5.x. Going back from 1.5.x to 1.4.1? Read
-[⚠ New in 1.5](#new-in-15) first: projects saved by 1.5 do not open on 1.2 to 1.4.1. Want to look around first?
-[Try it in your browser](https://hugelton.github.io/Felucca/webapp/try/), no FM-1 needed.
+**TL;DR:** OPQuencer v0.1.0 is Felucca 1.5.1 plus [MIDI OUT](#opquencer-m0): the sequencer, the
+arpeggiator and ratchets go out over USB on a TX channel per track — straight into any MIDI-CV
+converter (eurorack), drum machine or DAW. Build it ([BUILDING.md](BUILDING.md)) and install from
+[Install](#install) below; no extra hardware is needed. Installing is at your own risk: M-VAVE's
+updater or the installer's **Return to official V15** takes you back. Coming from Felucca 1.5.x?
+Everything carries over both ways: same projects, presets, backups, editor protocol and update path
+(same formats, same package identity, same USB descriptors but the product string).
+Coming from Felucca 1.1.5.x or going back to 1.2–1.4.1? The base firmware's notes still apply:
+[⚠ Coming from 1.1.5](#-coming-from-115), [⚠ New in 1.5](#new-in-15).
 
 Multi-engine synthesizer firmware for the M-VAVE FM-1. Please report what you find in
 [Issues](https://github.com/andrixb/OPQuencer/issues).
@@ -38,14 +44,50 @@ or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
   Felucca 1.5.1: projects, backups and the web editor carry over (the editor shows the new OUT mode
   under its globals; TX channels are menu-only for now).
 
-- Install: [web installer](https://hugelton.github.io/Felucca/) (Chrome or Edge, USB), or `tools/fm1_install.py` from a terminal
-- Try: [Felucca in your browser](https://hugelton.github.io/Felucca/webapp/try/): the same firmware compiled to
-  WebAssembly, with the panel on screen (mouse, touch, computer keyboard, Web MIDI in)
-- Editor: [web editor](https://hugelton.github.io/Felucca/webapp/editor/); its development has moved to
-  [Felucca-WebApp](https://github.com/hugelton/Felucca-WebApp)
-- Build: [BUILDING.md](BUILDING.md)
+## Roadmap
 
-<a href="https://hugelton.itch.io/felucca"><img src="https://static.itch.io/images/badge-color.svg" alt="Available on itch.io" width="74"></a>
+The FM-1 hardware is fixed (27 keys, KNOB 1–4 plus SELECT / ALGORITHM / PRESETS, a 240×240 screen,
+USB MIDI out, no CV jacks, no accelerometer, kilobytes of sample RAM), so both muses are adapted,
+never cloned:
+
+- **OP-style interface:** KNOB 1–4 already work like the OP's four color-coded encoders, and the four
+  tracks like four tape tracks — the roadmap leans into that. OP-1 sequencers (Sketch, Finger, Endless,
+  Tombola, Pattern) as generative writers into the 64 steps; the SONG chain as tape sections with loop
+  braces; the FX layer as tape tricks (reverse, half-speed, tape stop); punch-in mutes/solos in the GLO
+  mixer. Not coming: minutes-long linear tape (no memory for it), FM radio, tilt.
+- **Eloquencer-style sequencer:** M0 ships gate chance; next is controlled chance on the rest — pitch
+  (CV) variation probability + range, gate-length variation, ratchet probability and duplet/triplet
+  types — then pattern banks with variations, FILL, track SHIFT, and per-track step directions and clock
+  dividers. SEQ > DETAIL's four lanes are the home for all of it. Not coming: real CV/Gate jacks —
+  USB MIDI plus a host-capable converter (FH-2, Shuttle Control, host box) is the bridge.
+- **Deeper SLOOP merge (optional):** M0 adapts SLOOP's MIDI OUT design; SLOOP's live workflow
+  (free-tempo REC, fills, quick chain, 27 punch-ins, TEXTURE bed, per-track channels as settings) can
+  follow piece by piece, each behind the same no-format-break rule.
+
+## Install
+
+OPQuencer has no hosted installer yet: build it ([BUILDING.md](BUILDING.md)) and install your own
+`build/felucca.fwsc` (the package keeps the Felucca identity on purpose, so the loader, the installer
+and the editor keep working with it).
+
+- Browser (Chrome or Edge): serve the installer from `localhost` (Web MIDI needs a secure context),
+  connect the FM-1 by USB, and press Install:
+  ```
+  python3 web/make_site.py build/felucca.fwsc dev /tmp/opquencer-site
+  cd /tmp/opquencer-site && python3 -m http.server 8000
+  # open http://localhost:8000/webapp/installer/
+  ```
+  The installer's **Return to official V15** (with M-VAVE's `FM-1.fwsc`) takes you back to stock, and
+  M-VAVE's own updater (M-UPGRADE) works too — close every other app that uses MIDI first.
+- Terminal (needs `pip3 install mido python-rtmidi`): `python3 tools/fm1_install.py build/felucca.fwsc`
+  (`--info` shows the connected FM-1's identity).
+- Try it without hardware: the same firmware compiled to WebAssembly —
+  `./build.sh`, `web/emu/build.sh`, then `python3 -m http.server -d build/emu 8790`.
+  Felucca's hosted [try page](https://hugelton.github.io/Felucca/webapp/try/) runs the upstream 1.5.1.
+- Editor: `web/editor.html` in this repo, served the same way (Connect over USB-MIDI); it speaks the
+  same protocol as Felucca 1.5.1, so Felucca's hosted
+  [editor](https://hugelton.github.io/Felucca/webapp/editor/) reads and writes OPQuencer too.
+  The device identifies as "OPQuencer v0.1.0" and its USB MIDI port as "OPQuencer".
 
 ## Features
 
@@ -118,12 +160,14 @@ or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
   the notes the sequencer and MIDI IN play, and on SEQ > STEP (stopped) the notes of the step under the cursor;
   the drum grid marks the beats (steps 1, 5, 9, 13); MENU > SCALE LEDS shows the track's scale on the keys;
   a soft light sweeps over the keys at power-on, and with MENU > ANIM IDLE drifts over them while the FM-1 waits
-- **USB:** class-compliant MIDI in and out, and a stereo audio input ("Felucca") at 44.1 or 48 kHz
+- **USB:** class-compliant MIDI in and out, and a stereo audio input ("OPQuencer") at 44.1 or 48 kHz
   (the computer picks) that records the master output on the computer, no driver needed (at a fixed level with MENU > USB LEVEL FIXED;
   on macOS 13–15, set MENU > USB SERIAL to OFF so the audio input appears)
 - **MIDI:** USB and TRS MIDI in; MENU > MIDI > MIDI IN: CH1-4 (channels 1–4 play tracks 1–4), CH5-8, CH9-12 or
   CH13-16 (another block of four, e.g. for two FM-1s on one cable), or SEL (every channel plays the selected track);
-  the keys send on the track's channel; pitch bend, sustain, panic; clock from internal, USB or TRS. MIDI CCs set
+  the keys send on the track's TX channel (MENU > MIDI > TX T1..T4: FOLLOW, a fixed channel, or OFF);
+  MENU > MIDI > MIDI OUT set to SEQ sends the sequencer, the arpeggiator and ratchets too ([OPQuencer M0](#opquencer-m0));
+  pitch bend, sustain, panic; clock from internal, USB or TRS. MIDI CCs set
   track parameters: 5 GLIDE, 7 LEVEL, 10 PAN, 71 resonance, 72 / 73 / 75 release / attack / decay, 74 brightness,
   91 / 93 / 94 the reverb, chorus and delay sends. **MIDI LEARN** (GLO + D4) sets up to 16 more CCs of your
   controller to any knob's parameter of any track, on the device; **Program Change** loads a track's sound by its
@@ -131,7 +175,7 @@ or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
 - **Web:** editor for every parameter (with a 6-operator FM patch editor that also sends a whole 32-voice bank),
   step grid, mixer, preset library, sample upload and recording with trim, the MENU settings; full backup and restore
   (everything but the FM6 voice bank: keep its .syx file);
-  return to the official firmware; Felucca itself running in the browser
+  return to the official firmware; OPQuencer itself running in the browser
 
 ## New in 1.5.1
 
@@ -236,7 +280,7 @@ where marked here:
 
 ## Controls
 
-![FM-1 controls with Felucca](docs/controls.jpg)
+![FM-1 controls](docs/controls.jpg)
 
 - Tap a page button for its page, again for the next; HOME returns home. Page buttons act when let go
 - Hold FX, GLO, SCL, EDIT, REC or SEQ for its quick layer; hold SAVE to undo, HOME for the menu; hold LFO and turn a
@@ -418,26 +462,35 @@ the FM-1 can be brought back:
 - If it stays in boot mode, [FM-1 Transporter](https://github.com/kurogedelic/FM-1-transporter) reads and
   writes the FM-1's flash from a Mac through a Seeed XIAO RP2040 (three wires to the FM-1's USB lines). Back up
   the flash first, then write the official firmware (M-VAVE's FM-1.fwsc).
-- Questions: [Issues](https://github.com/hugelton/Felucca/issues).
+- Questions: [Issues](https://github.com/andrixb/OPQuencer/issues).
 
 ## Support
 
-If Felucca is useful to you, [sponsoring on GitHub](https://github.com/sponsors/hugelton) or a donation
-on [itch.io](https://hugelton.itch.io/felucca) helps keep its development going.
-
 Issues are for reproducible bugs (one per issue). Ideas and requests go to
-[Discussions](https://github.com/hugelton/Felucca/discussions), and feature requests posted as issues will be
+[Discussions](https://github.com/andrixb/OPQuencer/discussions), and feature requests posted as issues will be
 moved there. Pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Upstream Felucca bugs (present in 1.5.1 too) are best reported to
+[Felucca Issues](https://github.com/hugelton/Felucca/issues); if Felucca itself is useful to you,
+[sponsoring on GitHub](https://github.com/sponsors/hugelton) or a donation
+on [itch.io](https://hugelton.itch.io/felucca) helps keep its development going.
 
 ## AI disclaimer
 
-Felucca is developed with the assistance of AI coding agents. These tools are used for coding, testing, documentation, translation, and maintenance.
+OPQuencer is developed with the assistance of AI coding agents, following the upstream project it forks.
+These tools are used for coding, testing, documentation, translation, and maintenance.
 The instrument's design, features, sound design, and overall direction are determined by the maintainer or community.
 No generative AI is used to create music, icons, or visual artwork for this project.
-For more details, see [On AI-Assisted Development and Responsibility](https://github.com/hugelton/Felucca/discussions/166).
+Upstream: [On AI-Assisted Development and Responsibility](https://github.com/hugelton/Felucca/discussions/166).
 
 ## Credits
 
+- **OPQuencer** by [Andrix Bley](https://github.com/andrixb): the merge (Felucca 1.5.1 foundation +
+  SLOOP lineage), MIDI OUT (sequencer/arp/ratchets over USB, per-track TX channels, MENU > MIDI rows),
+  the OPQuencer identity (splash, ABOUT, USB product string, editor handshake, docs and screenshots),
+  and the OPQuencer test suite.
+- **SLOOP** by [isod89](https://github.com/isod89/sloop-fm1) (GPL-3.0): the live-groovebox lineage —
+  SEQ MIDI OUT design and per-track MIDI channels, reimplemented here for M0.
 - **[Hügelton Instruments](https://hugelton.com)** (Leo Kuroshita, [@kurogedelic](https://github.com/kurogedelic)):
   Felucca itself; the PHASE engine's waveforms (a C port of the oscillator of
   [CrispyZebra](https://github.com/hugelton/CrispyZebra), GPL-3.0); the DRUM voices and kits; the Hügelton Sample
@@ -464,6 +517,8 @@ For more details, see [On AI-Assisted Development and Responsibility](https://gi
 Free software: [GPL-3.0-only](LICENSE), the Hügelton Sample Pack included. The bundled fonts and the
 ported DSP keep their own licences ([LICENSES/](LICENSES/)); details in [LICENSING.md](LICENSING.md).
 
-M-VAVE and FM-1 are trademarks of their respective owners. Felucca is not affiliated with or endorsed by them.
+M-VAVE and FM-1 are trademarks of their respective owners. OPQuencer is not affiliated with or endorsed by them.
+Felucca is Hügelton Instruments' firmware, likewise unaffiliated with M-VAVE.
 
-Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments
+Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments (the Felucca base);
+Copyright (C) 2026 Andrix Bley (@andrixb) (the OPQuencer changes: MIDI OUT, identity, docs, tests)

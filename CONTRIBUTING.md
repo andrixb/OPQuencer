@@ -1,20 +1,22 @@
-# Contributing to Felucca
+# Contributing to OPQuencer
 
 Thanks for helping! To keep things easy to follow, please use the right place:
 
 | What | Where |
 |---|---|
-| A bug you can reproduce | [Issues](https://github.com/hugelton/Felucca/issues/new/choose): one issue per bug |
-| A feature idea or request | [Discussions › Ideas](https://github.com/hugelton/Felucca/discussions/categories/ideas) (no promise it will be added) |
-| How to use it, or how something works | [Discussions › Q&A](https://github.com/hugelton/Felucca/discussions/categories/q-a) |
-| Forks, mods, music, demos | [Discussions › Show and tell](https://github.com/hugelton/Felucca/discussions/categories/show-and-tell) |
-| Anything else | [Discussions › General](https://github.com/hugelton/Felucca/discussions/categories/general) |
+| A bug you can reproduce | [Issues](https://github.com/andrixb/OPQuencer/issues/new/choose): one issue per bug |
+| A feature idea or request | [Discussions › Ideas](https://github.com/andrixb/OPQuencer/discussions/categories/ideas) (no promise it will be added) |
+| How to use it, or how something works | [Discussions › Q&A](https://github.com/andrixb/OPQuencer/discussions/categories/q-a) |
+| Forks, mods, music, demos | [Discussions › Show and tell](https://github.com/andrixb/OPQuencer/discussions/categories/show-and-tell) |
+| Anything else | [Discussions › General](https://github.com/andrixb/OPQuencer/discussions/categories/general) |
 
-Feature requests posted as issues will be moved to Discussions or closed.
+Feature requests posted as issues will be moved to Discussions or closed. Bugs already present in
+upstream Felucca 1.5.1 are best reported to
+[Felucca Issues](https://github.com/hugelton/Felucca/issues/new/choose) too.
 
 ## Reporting a bug
 
-Please include the Felucca version (hold HOME > ABOUT), your computer's OS and browser if the editor or
+Please include the OPQuencer version (hold HOME > ABOUT), your computer's OS and browser if the editor or
 installer is involved, the steps to reproduce it, what you expected and what happened. A photo or a short
 video helps.
 
@@ -30,4 +32,5 @@ Pull requests are welcome, including AI-assisted ones, with the same bar for all
 
 By contributing you agree that your contribution is licensed under GPL-3.0-only.
 
-The web editor and installer live in [Felucca-WebApp](https://github.com/hugelton/Felucca-WebApp).
+The web editor and installer in `web/` are this repo's copies of Felucca's; the upstream editor's
+development lives in [Felucca-WebApp](https://github.com/hugelton/Felucca-WebApp).

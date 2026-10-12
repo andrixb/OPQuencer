@@ -65,7 +65,9 @@ static int32_t midi_base(void)
 static uint32_t trk_midi_ch(uint32_t i) { return (midi_base() > 0 ? (uint32_t)midi_base() : 0u) + i % NTRK; }
 
 /* OPQuencer M0: MIDI OUT of the sequencer, the arp and ratchets (G_MIDI SEQ; the keys always go out:
- * key_on / key_off). A track's OUT channel is its TX channel (core.h tx_raw: a fixed one, FOLLOW's
+ * key_on / key_off). The design follows SLOOP by isod89 (https://github.com/isod89/sloop-fm1, GPL-3.0:
+ * OUT mode, notes tracked per track and ended on their out-channel, no echo of MIDI IN), reimplemented
+ * here on the Felucca 1.5.1 sequencer. A track's OUT channel is its TX channel (core.h tx_raw: a fixed one, FOLLOW's
  * ROUTE block as before, 0xFF with TX OFF: nothing). Notes from USB / TRS IN are never echoed (no MIDI
  * loop). A set per track of the notes sent out, so a note ends once, on the channel it went out on
  * whatever TX says now, and STOP, a panic or MIDI OUT back to KEYS end them all */
