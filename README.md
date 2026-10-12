@@ -3,37 +3,43 @@
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
 
 **OPQuencer v0.2.0** is a custom firmware for the M-VAVE FM-1, a merge of two lineages:
-[Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments) — the
-engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX) — and
-[SLOOP](https://github.com/isod89/sloop-fm1) by isod89 — the live-groovebox lineage (SEQ MIDI OUT
-design, per-track MIDI channels), reimplemented here on the Felucca 1.5.1 foundation. The goal is a
-**Teenage Engineering OP-style instrument** (immediate, playful, four tracks like four tape tracks)
+- [Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments), the
+engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX) 
+— [SLOOP](https://github.com/isod89/sloop-fm1) by isod89, the live-groovebox lineage (SEQ MIDI OUT
+design, per-track MIDI channels), reimplemented here on the Felucca 1.5.1 foundation.
+
+The goal is a **Teenage Engineering OP-style instrument** (immediate, playful, four tracks like four tape tracks)
 with a **Winter Modular Eloquencer-style sequencer** (controlled chance on every parameter); v0.1.0
 laid the bridge ([MIDI OUT](#opquencer-m0)) so the FM-1 can drive eurorack through any MIDI-CV
-converter, and v0.2.0 brings the first controlled chance ([M1](#opquencer-m1)). See [Roadmap](#roadmap)
-for where the two muses go next. The Felucca documentation that
-follows still applies; where it says "Felucca", the device now says "OPQuencer".
+converter, and v0.2.0 brings the first controlled chance ([M1](#opquencer-m1)). 
+
+See [Roadmap](#roadmap) for where the two muses go next. 
+
+The Felucca documentation that follows still applies; where it says "Felucca", the device now says "OPQuencer".
 
 ![OPQuencer v0.2.0 (top to bottom, left to right: boot splash, MENU > MIDI with OUT + TX channels, SEQ > CHANCE, ABOUT)](docs/opquencer-0.2.0.png)
 
 **TL;DR:** OPQuencer v0.2.0 is Felucca 1.5.1 plus [MIDI OUT](#opquencer-m0): the sequencer, the
 arpeggiator and ratchets go out over USB on a TX channel per track — straight into any MIDI-CV
-converter (eurorack), drum machine or DAW — plus [controlled chance](#opquencer-m1): per-track CV
-variation and ratchet probability/feel on SEQ > CHANCE. Build it ([BUILDING.md](BUILDING.md)) and install from
-[Install](#install) below; no extra hardware is needed. Installing is at your own risk: M-VAVE's
-updater or the installer's **Return to official V15** takes you back. Coming from Felucca 1.5.x or
-OPQuencer v0.1.0?
+converter (Eurorack), drum machine or DAW, plus [controlled chance](#opquencer-m1): per-track CV
+variation and ratchet probability/feel on SEQ > CHANCE. 
+
+Build it ([BUILDING.md](BUILDING.md)) and install from [Install](#install) below; no extra hardware is needed. 
+
+Installing is at your own risk: M-VAVE's updater or the installer's **Return to official V15** takes you back. 
+
+### Coming from Felucca 1.5.x or OPQuencer v0.1.0?
 Everything carries over both ways: same projects, presets, backups, editor protocol and update path
 (same formats, same package identity, same USB descriptors but the product string).
 Coming from Felucca 1.1.5.x or going back to 1.2–1.4.1? The base firmware's notes still apply:
 [⚠ Coming from 1.1.5](#-coming-from-115), [⚠ New in 1.5](#new-in-15).
 
-Multi-engine synthesizer firmware for the M-VAVE FM-1. Please report what you find in
+Multi-engine synthesiser firmware for the M-VAVE FM-1. Please report what you find in
 [Issues](https://github.com/andrixb/OPQuencer/issues).
 
 ## OPQuencer M0
 
-MIDI OUT for eurorack (any USB-host MIDI-CV converter: Expert Sleepers FH-2, Endorphin Shuttle Control,
+MIDI OUT for Eurorack (any USB-host MIDI-CV converter: Expert Sleepers FH-2, Endorphin Shuttle Control,
 or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
 
 - **MENU > MIDI > MIDI OUT:** KEYS (live keys only, as before) or SEQ (the sequencer's notes at their
@@ -169,7 +175,7 @@ and the editor keep working with it).
 - **Presets:** factory presets, 32 user preset slots and 4 projects, named on the device (an FM6
   sound keeps its own patch in both); user presets get a category, and a project can get a random name; projects
   from every earlier version load. The PRESETS knob changes the sound from every page that is not a list.
-  Turn the FM-1 off and on and the music is as you left it (MENU > RESTORE LAST, an autosave of its own,
+  Turn the FM-1 off and on, and the music is as you left it (MENU > RESTORE LAST, an autosave of its own,
   written only when stopped and idle)
 - **Screen:** flat UI with Inter Tight and Fukiai icons, FLAT or LINE style, 10 palettes including
   grayscale, black and white, high contrast and NIGHT; type in sizes by role (what you read in the larger size,
@@ -191,7 +197,7 @@ and the editor keep working with it).
   the keys send on the track's TX channel (MENU > MIDI > TX T1..T4: FOLLOW, a fixed channel, or OFF);
   MENU > MIDI > MIDI OUT set to SEQ sends the sequencer, the arpeggiator and ratchets too ([OPQuencer M0](#opquencer-m0));
   pitch bend, sustain, panic; clock from internal, USB or TRS. MIDI CCs set
-  track parameters: 5 GLIDE, 7 LEVEL, 10 PAN, 71 resonance, 72 / 73 / 75 release / attack / decay, 74 brightness,
+  track parameters: 5 GLIDE, 7 LEVEL, 10 PAN, 71 resonance, 72 / 73 / 75 release/attack/decay, 74 brightness,
   91 / 93 / 94 the reverb, chorus and delay sends. **MIDI LEARN** (GLO + D4) sets up to 16 more CCs of your
   controller to any knob's parameter of any track, on the device; **Program Change** loads a track's sound by its
   number in PRESETS
@@ -203,10 +209,10 @@ and the editor keep working with it).
 ## New in 1.5.1
 
 - **SEQ > DETAIL** (Discussion #199): SEQ now goes STEP, **DETAIL**, AUTOMATION. DETAIL is the STEP page (the same
-  cursor, the same piano roll or drum grid) with KNOB 1–4 as the cursor step's **CHANCE**, **RATCH**, **NUDGE** and
+  cursor, the same piano roll or drum grid) with KNOB 1–4 as the cursor step's **CHANCE**, **RATCH**, **NUDGE**, and
   **VEL**; PRESETS walks the steps, and on a DRUM track a white key picks its step. The four are drawn as lanes over
-  the steps; EDIT puts the step's four back. On STEP and the drum grid a step with a CHANCE, RATCH or NUDGE gets a
-  small mark. These are the values AUTOMATION lists (EDIT there still deletes a row): nothing new is stored.
+  the steps; EDIT puts the step's four back. On STEP and the drum grid, a step with a CHANCE, RATCH or NUDGE gets a
+  small mark. These are the values AUTOMATION lists (EDIT still deletes a row): nothing new is stored.
 - **MIDI Program Change** (PR #179 by [renebohne](https://github.com/renebohne)): a Program Change on a track's
   channel (routed as notes by MENU > MIDI > MIDI IN) loads that track's sound, numbered from 0 as PRESETS lists
   the engine's sounds. DRUM: its kits (0–5: STD, 80, 10, 66, 55, 77). FM6: 0–7 its presets (F1–F8), 8–39 the voice
@@ -215,7 +221,7 @@ and the editor keep working with it).
   (… 1/2, 1/4D, 1/4, 1/8D, 1/8, 1/16D, 8T …). The delay holds 1.49 s, so 1/4D is held to that at 60 BPM and below.
 - **REV THROW and ECHO THROW** in the FX layer, on **D5** and **E5** by default: while held, every track's reverb
   send (REV THROW) or delay send (ECHO THROW) is full, gliding in and out without a click; ECHO THROW also lifts the
-  delay's FDBK to 70 % if it is lower. Let go and the tails ring out. Nothing is saved or recorded. If you had set
+  delay's FDBK to 70 % if it is lower. Let go, and the tails ring out. Nothing is saved or recorded. If you had set
   D5 or E5 to NONE, they now hold the throws: set them to NONE again (hold the key in the FX layer, turn PRESETS).
 - Fixed: turning KNOB 4 (LIST) or KNOB 3 (FAV) on PRESETS made all the LEDs flash; the change is now saved once you
   leave the page or after 10 s idle (#197). MOMENTARY (LFO held) now works on MIXER too: LEVEL, PAN, REV and MUTE go
@@ -227,9 +233,9 @@ and the editor keep working with it).
 
 ## New in 1.5
 
-- **An INSERT effect on every track, with a dry / wet MIX** (Discussions #78, #177): FX → INSERT. KNOB 1 TYPE: SOFT,
+- **An INSERT effect on every track, with a dry/wet MIX** (Discussions #78, #177): FX → INSERT. KNOB 1 TYPE: SOFT,
   HARD, FOLD, FUZZ (drives: DRIVE, TONE, LEVEL), CRUSH (BITS, RATE, LPF), PHASR, FLANG, CHOR (RATE, DEPTH, FDBK);
-  INSERT 2: MIX. It comes after DIST and before the SLICER, is part of the sound (user presets and projects keep it)
+  INSERT 2: MIX. It comes after DIST and before the SLICER; it is part of the sound (user presets and projects keep it)
   and works with automation and locks. TYPE OFF, the default, plays exactly as before.
 - **MIDI LEARN** (Discussion #170): on any page hold GLO and press D4 (MIDI LEARN ON), turn the FM-1 knob of a
   parameter, then move a knob or fader on your controller: that CC now sets the parameter (the header says e.g.
@@ -241,9 +247,9 @@ and the editor keep working with it).
 - **ENV SYNC** (Discussion #175): ENV DEST's KNOB 4 (ESYNC) makes ENV's ATK, DEC and REL note values of the tempo
   (1/64T to 4 bars, dotted and triplets) instead of milliseconds; they follow the tempo and an external clock.
 - **A note's length on the piano roll** (Discussions #178, #173): on SEQ → STEP, KNOB 3 on a note step is its **LEN**:
-  right ties the steps after it on, left takes them back. It stops before the next note ("NOTE AHEAD").
+  Right ties the steps after it on; left takes them back. It stops before the next note ("NOTE AHEAD").
 - **Per-step velocity** (Discussion #173): SEQ → AUTOMATION, **+ ADD VEL** (OCT+: SHOW) lists every note step's
-  velocity, KNOB 4 sets it (1–127). Steps entered by hand play 96, steps recorded live keep how hard you played.
+  velocity; KNOB 4 sets it (1–127). Steps entered by hand play 96; steps recorded live keep how hard you played.
 - **HELP** (Discussion #156; MENU > SYSTEM > HELP, OFF by default): ON shows a short hint, key caps and a few words, in
   the footer for about 2 s when a page opens, and under a quick layer's map while it shows.
 - **SAVE reaches PRESETS on its second tap** (#173): SAVE's pages go USER, PRESETS, PHRASES, PROJECT, TOOLS. The quick
@@ -265,7 +271,7 @@ and the editor keep working with it).
 
 - **Engine quick actions on the EDIT layer's black keys.** Hold EDIT: the black keys do what the selected track's
   engine offers, and the map shows it. On a DRUM track, black keys 1–8 (F#3 … A#4) mute its lanes KICK, SNARE, CLAP,
-  HATCL, HATOP, TOM, RIM and BELL, one press to mute, the next to unmute. The LEDs show which lanes sound, the drum
+  HATCL, HATOP, TOM, RIM and BELL; one press to mute, the next to unmute. The LEDs show which lanes sound; the drum
   grid dims a muted lane. A muted lane keeps playing unheard, so unmuting brings it back in time. The mutes are for
   live play: never saved, not recorded, not undone; a sound or project load clears them, OCT− in the layer puts them
   back as they were when it opened. Other engines have no quick actions yet.
@@ -274,7 +280,7 @@ and the editor keep working with it).
   then **B1–B32**, the bank's voices; the algorithm chart shows the voice's name. Picking a voice copies it into the
   track, as F1–F8 do, so a project or user preset saved with it keeps that sound after you send another bank (it
   loads with SLOT OWN). With no bank sent, SLOT stops at OWN as before. The bank has its own flash sector and is only
-  replaced once a new one arrived whole; projects, presets, samples and settings are not touched. **The full backup
+  replaced once a new one arrives whole; projects, presets, samples and settings are not touched. **The full backup
   does not include the bank: keep the .syx file.**
 - 1.4.1 opens and saves everything 1.4 does, in the same formats.
 
@@ -299,18 +305,18 @@ where marked here:
 - **A fresh start uses the HALL reverb** (up to 1.1.5: ROOM). Saved projects keep their reverb TYPE.
 - **BASS+ (MENU > SPEAKER EQ) is softer:** its added harmonics are at half the level, so a full-scale kick no longer
   distorts (#180).
-- **The web editor** needs its update for the new features; use the one on the site.
+- **The web editor** needs an update for the new features; use the one on the site.
 
 ## Controls
 
 ![FM-1 controls](docs/controls.jpg)
 
-- Tap a page button for its page, again for the next; HOME returns home. Page buttons act when let go
+- Tap a page button for its page; tap again for the next; HOME returns home. Page buttons act when let go
 - Hold FX, GLO, SCL, EDIT, REC or SEQ for its quick layer; hold SAVE to undo, HOME for the menu; hold LFO and turn a
   knob for a MOMENTARY change
 - Double-tap a layer's button to keep its layer open without holding; tap it again to close
 - On SEQ > STEP, hold a step and turn KNOB 1–4 to lock those parameters on that step (PRESETS: its NUDGE)
-- On action pages and in dialogs, OCT+ does it and OCT− goes back; in the menu, OCT+ / OCT− change the value and HOME closes it
+- On action pages and in dialogues, OCT+ does it and OCT− goes back; in the menu, OCT+ / OCT− change the value and HOME closes it
 - Save a sound: stop, tap SAVE, pick a slot with KNOB 1, then OCT+ and OCT+ again (name it with the keys)
 
 The pages by button:
@@ -347,7 +353,7 @@ way as from the menu, in the same tabs.
 - **ANIM:** ON, OFF or IDLE. OFF shows every change at once, without rolling digits, a gliding piano roll or
   the LED sweep at power-on. IDLE is ON plus a gentle LED animation after a minute without input: a soft light drifts
   over the keys and the buttons breathe; any key, button or knob ends it and does what it always does. It never runs
-  while playing, with a track armed, in a layer, the menu or a dialog
+  while playing, with a track armed, in a layer, the menu or a dialogue
 - **LEDS:** OFF (no glow), DIM LO, DIM HI (default) or INV (the idle LEDs lit, the active ones dark).
   What can be pressed breathes up to about 60 % of a lit LED, about 30 % with DIM LO
 - **SCREEN OFF:** NEVER (default), 5 MIN, 15 MIN, 30 MIN or 60 MIN: after that long with no button, key or knob
@@ -356,13 +362,13 @@ way as from the menu, in the same tabs.
 - **SCOPE:** OUT (default) or MIX: what HOME's oscilloscope shows. OUT the sound after MASTER (the picture shrinks
   with the volume), MIX the mix before MASTER, the same size at any volume
 - **HOME:** SCOPE (default), TRACKS or LEVELS: under HOME's four cards, the oscilloscope or the four tracks, a row
-  each with its sound, its steps playing, MUTE and a meter. With TRACKS only the look changes; with LEVELS KNOB 1–4
+  each with its sound, its steps playing, MUTE and a meter. With TRACKS, only the look changes; with LEVELS, KNOB 1–4
   set the LEVEL of T1–T4 (the engine's main parameters are on EDIT)
 - **HOLD:** how long a layer's button is held before its map shows
 - **KNOB ACCEL:** OFF (one step per click) or ON: a fast, steady turn of a wide value moves 2 to 4 steps
-  per click, up to 8 on values of more than 64 steps, the FX and GLO layers' knobs included; lists never
+  per click, up to 8 on values of more than 64 steps; the FX and GLO layers' knobs included; lists never
   jump. ON or OFF, every click of a fast turn counts
-- **FX LATCH:** ON, FX + an effect key turns the effect on until pressed again, the knob macros stay
+- **FX LATCH:** ON, FX + an effect key turns the effect on until pressed again; the knob macros stay
   where you leave them, and FX + OCT− turns everything off
 - **BPM LOCK:** ON, SELECT no longer changes the tempo; hold GLO and turn SELECT, tap F4 in the GLO
   layer or use HOME > CLOCK instead
@@ -377,7 +383,7 @@ way as from the menu, in the same tabs.
   shapes the headphone out and USB audio, so keep it on FLAT when recording. The firmware cannot turn
   the speaker off, but headphones in the jack do
 - **USB LEVEL:** MASTER (the MASTER knob sets the USB audio level too) or FIXED (USB always at full
-  level, MASTER sets only the speaker and headphones)
+  level; MASTER sets only the speaker and headphones)
 - **CLICK:** OFF (default), REC (while a track is armed) or ON: a click on every beat while playing, the
   bar's first beat higher. **CLICK LEVEL:** LOW, MID (default) or HIGH; MASTER sets it too
 - **COUNT-IN:** OFF (default), 1 BAR or 2 BARS: with a track armed, PLAY counts in first (clicking even with
@@ -400,7 +406,7 @@ way as from the menu, in the same tabs.
 
 In the order the device lists them:
 
-- **ANALOG**: virtual analog; two oscillators (WAVE SYNC: the second hard-synced to the first; SUB: a square an
+- **ANALOG**: virtual analogue; two oscillators (WAVE SYNC: the second hard-synced to the first; SUB: a square an
   octave down), noise, drive, a resonant filter: low-pass, band-pass or high-pass (EDIT > FILTER)
 - **FM6**: classic 6-operator FM (Dexed-based): 32 algorithms, a full patch per track, edited in the
   web editor (which imports .syx files) or on the device: EDIT > OPERATOR (ratio or fixed frequency, fine, level),
@@ -414,15 +420,15 @@ In the order the device lists them:
 - **WHEEL**: tonewheel-style organ; drawbar registrations, percussion, key click, drive, rotary speaker
 - **GRAIN**: granular textures from the built-in samples or a user slot
 - **PHYS**: physical models: modal resonators, strings, struck membranes, sympathetic strings
-- **NOISE**: noise from analog to digital: colours, crackle, shift-register and metallic tones
+- **NOISE**: noise from analogue to digital: colours, crackle, shift-register and metallic tones
 - **SLICE**: a drum break, a piano note (both built in) or your own sample cut into slices, one per key;
   set the slices by hand on the SLICES page
 - **DRUM**: an 8-lane kit of Felucca's own drum voices on the General MIDI key map. KIT picks the
-  standard kit or one of five virtual-analog (VA) kits in the manner of
-  classic analog drum machines (the numbers are a hint), every lane its own voice: **80** (deep sine kick with a long decay, noisy snare,
+  standard kit or one of five virtual-analogue (VA) kits in the manner of
+  classic analogue drum machines (the numbers are a hint), every lane its own voice: **80** (deep sine kick with a long decay, noisy snare,
   six-square hats), **10** (swept kick, white-noise snare, long-tailed claps, a cymbal), **66** (soft
   round kick, bright snare, noise hats, a conga), **55** (dropping kick, high metal hats, a metal bell)
-  and **77** (swelling kick, multi-burst claps, claves, a cymbal). All of them are synthesized by
+  and **77** (swelling kick, multi-burst claps, claves, a cymbal). All of them are synthesised by
   Felucca, no samples. EDIT > LANES and LANES 2 set each lane's level
 
 The DIGITAL engine of 0.9 has been replaced by FM6: projects and presets with DIGITAL sounds load
@@ -431,7 +437,7 @@ projects that used it load as the DRUM engine's kit, on the same key map. FM6's 
 slots) was removed in 1.0.3: user presets keep their own FM6 patch, and presets that used a B slot get
 that patch on the first start of 1.0.3. 1.4.1 brings B slots back as a voice bank sent from the web editor
 (B1–B32): a voice picked from it becomes the track's own patch, so nothing saved depends on the bank. SLICE gained a second built-in sound in 1.0.4, PIANO (the SAMPLE
-engine's middle C as it was then), next to BREAK. Since 1.0.4 a missing sample (an empty user slot, or a set missing
+engine's middle C as it was then), next to BREAK. Since 1.0.4, a missing sample (an empty user slot, or a set missing
 from the build) plays a plain sine at the note's pitch on SAMPLE, GRAIN and SLICE, and the screen says
 NO SAMPLE once. DRUM's KIT variants HAND, CYM and H+CYM were retired in 1.0.5: sounds and projects that
 used them play the 66, 10 and 77 kits. SAMPLE's PIANO was a lo-fi piano in 1.4 and 1.4.1 (the full one installed into a user slot from the web editor as
@@ -451,7 +457,7 @@ above and below it. Black keys are silent, including during live recording and
 step entry. **TRN** transposes the resulting notes; the octave buttons shift them
 by full octaves. Set QNT to OFF for the normal chromatic keyboard. QNT SEQ snaps the keys like SNAP and
 also maps the sequenced notes onto the current ROOT / SCALE as they play (the steps are not changed; drum
-kits are never quantized).
+kits are never quantised).
 
 Available scales: chromatic (CHR), major (MAJ), natural minor (MIN), Dorian (DOR),
 Mixolydian (MIX), major pentatonic (PEN), minor pentatonic (MPEN), harmonic minor
