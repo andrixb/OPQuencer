@@ -2597,7 +2597,8 @@ static int test_presets_knob(void)
             int same_snd = TSEL->preset == before.preset && TSEL->eng_req == before.eng_req &&
                            !memcmp(TSEL->p, before.p, sizeof before.p);
             int same_steps = !memcmp(TSEL->step, before.step, sizeof before.step);
-            if (g == GR_ROLL) {
+            if (g == GR_ROLL && !str_eq(PAGES[i].title, "CHANCE")) {   /* (STEP, DETAIL: the cursor; CHANCE is a
+                                                                         * sound page like the rest, below) */
                 cur_ok &= ui.cursor == 1u && same_snd && same_steps && ui.page == i;
                 n_cur++;
             } else if (g == GR_USER) {
@@ -2685,8 +2686,8 @@ static int test_page_cycles(void)
                                     f == FAM_SAVE ? B_SAVE : FAM_BTN[f]);
     }
     for (i = 0; i < NPAGES; i++)
-        ok &= !str_eq(PAGES[i].title, "PATTERN") && !str_eq(PAGES[i].title, "CHANCE") && !str_eq(PAGES[i].title, "AUTO LIST");
-    bad += check("1.2: SEQ has STEP and AUTOMATION only; SONG is GLO's only page, PHRASES SAVE's, MIXER and CLOCK HOME's "
+        ok &= !str_eq(PAGES[i].title, "PATTERN") && !str_eq(PAGES[i].title, "AUTO LIST");
+    bad += check("1.2: SEQ has STEP DETAIL CHANCE AUTOMATION; SONG is GLO's only page, PHRASES SAVE's, MIXER and CLOCK HOME's "
                  "(their LED HOME)", ok);
     {   /* 1.2: GLOBAL and SYSTEM are gone; their knobs: BPM SWG CLK on HOME > CLOCK, TUNE and ROUT on no page (the MENU's),
          * MIDI SYNC CPU on none (INFO shows the USB state and the CPU) */
@@ -6592,13 +6593,16 @@ static int test_seq_tools(void)
     press(B_SEQ); frames(320);
     ok = str_eq(cur_page()->title, "DETAIL") && msg_is("HOLD [SEQ] QUICK");   /* (1.5.1, #199) */
     press(B_SEQ); frames(320);
+    ok &= str_eq(cur_page()->title, "CHANCE");   /* (OPQuencer M1) */
+    press(B_SEQ); frames(320);
     ok &= cur_page()->graph == GR_EVENTS && str_eq(cur_page()->title, "AUTOMATION");
     press(B_SEQ); frames(320);
     ok &= str_eq(cur_page()->title, "STEP");
     press(B_SEQ); frames(320);
     press(B_SEQ); frames(320);
+    press(B_SEQ); frames(320);
     ok &= cur_page()->graph == GR_EVENTS;
-    bad += check("1.2: a tap on STEP: DETAIL (1.5.1), AUTOMATION, then STEP again (three SEQ pages; the hint until the layer "
+    bad += check("1.2: a tap on STEP: DETAIL (1.5.1), CHANCE (M1), AUTOMATION, then STEP again (four SEQ pages; the hint until the layer "
                  "was opened)", ok);
     go_title("ENV"); frame();
     press(B_SEQ); frames(320);
@@ -6945,6 +6949,8 @@ static int test_layer_lock(void)
     ok = str_eq(cur_page()->title, "STEP") && !ui.lock;
     press(B_SEQ); frames(400);
     ok &= str_eq(cur_page()->title, "DETAIL") && !ui.lock && !ui.layer;   /* (1.5.1) */
+    press(B_SEQ); frames(400);
+    ok &= str_eq(cur_page()->title, "CHANCE") && !ui.lock && !ui.layer;   /* (OPQuencer M1) */
     press(B_SEQ); frames(400);
     ok &= str_eq(cur_page()->title, "AUTOMATION") && !ui.lock && !ui.layer;
     press(B_SEQ);

@@ -38,10 +38,11 @@ static int motion_param(uint32_t id)
     return id < P_COUNT && (id <= P_REL || (id >= P_ED_FLT && id <= P_LD_AMP) ||
         (id >= P_DIST && id <= P_REV) || id == P_GLIDE || id == P_PAN ||
         id == P_DETUNE || (id >= P_FM1_ATK && id <= P_FM4_LEVEL) || (id >= P_LN0 && id <= P_LN7) ||
-        id == P_SPRD || (id >= P_ITYPE && id <= P_IMIX) || id >= P_E0);   /* (not the chord keys, nor 1.2's LFO SYNC TRIG
+        id == P_SPRD || (id >= P_ITYPE && id <= P_IMIX) || (id >= P_CVVP && id <= P_RTTY) || id >= P_E0);   /* (not the chord keys, nor 1.2's LFO SYNC TRIG
                                         * POL and QUANTIZE, nor 1.5's filter TYPE and ENV SYNC: settings; the DRUM lane
                                         * levels, SPREAD (#148: continuous, as PAN), 1.5's INSERT (TYPE too: a lock
-                                        * switches it for a step, fx.c track_insert fades over), E0..E7) */
+                                        * switches it for a step, fx.c track_insert fades over), OPQuencer M1's
+                                        * controlled chance (a lock varies it for a step, seq.c), E0..E7) */
 }
 static int motion_valid(const motion_store_t *m)
 {

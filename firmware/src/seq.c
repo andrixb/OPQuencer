@@ -134,6 +134,26 @@ static void seq_out_all_off(void)
         seq_out_track_off(&trk[i]);
 }
 
+/* OPQuencer M1: controlled chance (Eloquencer-style, track-level; SEQ > CHANCE): the CV (pitch) variation
+ * rolled once per pass in seq_play (one delta for the step's notes, snapped to the track's scale; lane hits
+ * never vary), the ratchet's probability (else the step plays x1 this pass) and feel (ratch_bound).
+ * A step's locks of the four shape the roll (seq_play reads them after the automation). TIEs carry no
+ * notes; STEP PREVIEW (seq_quiet) sounds the step as written. MIDI OUT (M0) carries the varied notes. */
+static int8_t seq_cvv[NTRK];
+static uint8_t seq_rtok[NTRK];
+/* a ratchet part's start in twelfths of the step: EQUAL as before, PUSH a long first part with a tight
+ * tail, DRAG a tight head with a long last part (x3 EQUAL already feels triplet) */
+static uint32_t ratch_bound(uint32_t hits, uint32_t type, uint32_t part)
+{
+    static const uint8_t B[3][3][5] = {
+        {{0, 6, 12, 0, 0}, {0, 4, 8, 12, 0}, {0, 3, 6, 9, 12}},        /* EQUAL x2 x3 x4 */
+        {{0, 9, 12, 0, 0}, {0, 8, 10, 12, 0}, {0, 9, 10, 11, 12}},     /* PUSH */
+        {{0, 3, 12, 0, 0}, {0, 2, 4, 12, 0}, {0, 1, 2, 3, 12}},        /* DRAG */
+    };
+    uint32_t h = hits < 2u ? 0u : hits > 4u ? 2u : hits - 2u, ty = type > 2u ? 0u : type;
+    return B[ty][h][part > hits ? hits : part];
+}
+
 static int drum_track(const track_t *t) { return ENGINES[eng_idx(t->eng_req)] == &ENG_DRUM; }
 
 /* the 27 keys from F: black or white, and the key's place among the keys of its colour (white 0..15, black
@@ -966,7 +986,7 @@ static __attribute__((noinline)) void seq_step(track_t *t, const step_t *s, uint
     uint32_t slide_in = t->seq_hold && t->seq_n && !(skip & SEQ_REP);
     uint32_t len = t->p[P_SLEN] ? (uint32_t)t->p[P_SLEN] : 1u;
     uint32_t next_tie = seq_steps(t)[(idx + 1u) % len].time == ST_TIE;
-    uint32_t hits = step_ratchet(s);
+    uint32_t hits = seq_rtok[trk_index(t) % NTRK] ? step_ratchet(s) : 1u;   /* M1: the pass plays the ratchet or x1 */
     uint8_t nn[4 + NLANE], vv[4 + NLANE];           /* the notes it plays: its notes, then its hits */
     uint32_t m = 0, sk = 0;
     /* QNT SEQ: the step's notes (not the lane hits) snap to the scale as they play; never on a drum kit, the slices
@@ -993,12 +1013,20 @@ static __attribute__((noinline)) void seq_step(track_t *t, const step_t *s, uint
         return;
     }
     if (hits > 1u) {                                /* RATCH: the gate of a part, no slide or tie out */
-        gate = step_samples(t, period, idx) / hits * (uint32_t)t->p[P_SGATE] / 128u;
+        uint32_t sl = step_samples(t, period, idx), ty = (uint32_t)t->p[P_RTTY];
+        uint32_t part = (skip & SEQ_REP) ? (hits - 1u - t->rat_left) : 0u;   /* M1: the part's own length (PUSH/DRAG) */
+        if (part > hits - 1u)
+            part = hits - 1u;
+        gate = sl * (ratch_bound(hits, ty, part + 1u) - ratch_bound(hits, ty, part)) / 12u *
+               (uint32_t)t->p[P_SGATE] / 128u;
         if (!(skip & SEQ_REP))
             t->rat_left = (uint8_t)(hits - 1u);
     }
     for (i = 0; i < s->n && i < 4u; i++) {
         uint32_t x = s->note[i];
+        int32_t cvv = seq_cvv[trk_index(t) % NTRK];
+        if (cvv)                                      /* M1: one variation for the step's notes (not its hits) */
+            x = (uint32_t)clamp(scale_snap(t, (int32_t)x + cvv), 0, 127);
         if (qseq) {                                 /* QNT SEQ: onto the scale now; two notes snapping */
             x = (uint32_t)clamp(scale_snap(t, (int32_t)x), 0, 127);   /* together play once */
             for (j = 0; j < m && nn[j] != x; j++)
@@ -1048,7 +1076,8 @@ static __attribute__((noinline)) void seq_step(track_t *t, const step_t *s, uint
 
 /* MENU > CONTROL > STEP PREVIEW (1.2, Discussion #169): the UI asks for a step of a track to sound once (aud_req: step
  * << 8 | track + 1; ui_input.c cursor_move); with the transport stopped it plays here as the sequencer would play it,
- * through the track's sound: its notes or hits, accent, QNT SEQ (not its chance, ratchet repeats or locks), for a 1/16
+ * through the track's sound: its notes or hits, accent, QNT SEQ (not its chance, ratchet repeats or locks,
+ * no M1 variation: as written), for a 1/16
  * at the track's GATE (seq_tick lets it go, stopped too). A SLIDE or TIE after it does not hold it. Nothing is recorded:
  * the step is only read */
 static volatile uint16_t aud_req;
@@ -1064,6 +1093,8 @@ static __attribute__((noinline)) void seq_audition(void)
     at = t->seq_idx;
     t->seq_idx = (uint16_t)idx;
     seq_quiet = 1;                                    /* a preview sounds locally only, never to MIDI OUT */
+    seq_cvv[i] = 0;                                   /* .. and as written (no M1 variation, the ratchet as set) */
+    seq_rtok[i] = 1;
     seq_step(t, &t->step[idx], idx, div_samples(2), SEQ_ROLLED);
     seq_quiet = 0;
     t->seq_idx = at;
@@ -1077,11 +1108,12 @@ static __attribute__((noinline)) void seq_ratchet(track_t *t, uint32_t period)
 {
     const step_t *s = &seq_steps(t)[t->seq_idx];
     uint32_t hits = step_ratchet(s);
+    uint32_t sl = step_samples(t, period, t->seq_idx);
     if (t->rat_left >= hits) {
         t->rat_left = 0;
         return;
     }
-    if (t->seq_pos < (hits - t->rat_left) * (step_samples(t, period, t->seq_idx) / hits))
+    if (t->seq_pos < sl * ratch_bound(hits, (uint32_t)t->p[P_RTTY], hits - t->rat_left) / 12u)
         return;
     t->rat_left--;
     seq_step(t, s, t->seq_idx, period, SEQ_REP);
@@ -1115,6 +1147,15 @@ static __attribute__((noinline)) void seq_play(track_t *t, uint32_t idx, uint32_
         skip = SEQ_MISS;
     if (m)
         motion_step(t, idx, m, skip == SEQ_ROLLED);
+    {   /* M1 controlled chance, once per pass (the ratchet's parts share it; the step's locks already applied) */
+        uint32_t ti = trk_index(t) % NTRK;
+        int32_t range = t->p[P_CVVR];
+        if (t->p[P_CVVP] > 0 && range > 0 && (rng() % 100u) < (uint32_t)t->p[P_CVVP])
+            seq_cvv[ti] = (int8_t)((1 + rng() % (uint32_t)range) * (rng() & 1u ? 1 : -1));
+        else
+            seq_cvv[ti] = 0;
+        seq_rtok[ti] = (uint8_t)(!t->p[P_RTPR] || (rng() % 100u) < (uint32_t)t->p[P_RTPR]);
+    }
     if (t->rskip_n && t->rskip_idx == idx) {
         for (k = 0; k < t->rskip_n; k++) {
             for (i = 0; i < s->n; i++)

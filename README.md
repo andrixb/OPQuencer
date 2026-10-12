@@ -2,24 +2,27 @@
 
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
 
-**OPQuencer v0.1.0** is a custom firmware for the M-VAVE FM-1, a merge of two lineages:
+**OPQuencer v0.2.0** is a custom firmware for the M-VAVE FM-1, a merge of two lineages:
 [Felucca 1.5.1](https://github.com/hugelton/Felucca) by Leo Kuroshita (Hügelton Instruments) — the
 engine room (13 synth engines, 64-step sequencer with DETAIL lanes, songs, FX) — and
 [SLOOP](https://github.com/isod89/sloop-fm1) by isod89 — the live-groovebox lineage (SEQ MIDI OUT
 design, per-track MIDI channels), reimplemented here on the Felucca 1.5.1 foundation. The goal is a
 **Teenage Engineering OP-style instrument** (immediate, playful, four tracks like four tape tracks)
 with a **Winter Modular Eloquencer-style sequencer** (controlled chance on every parameter); v0.1.0
-lays the bridge ([MIDI OUT](#opquencer-m0)) so the FM-1 can drive eurorack through any MIDI-CV
-converter. See [Roadmap](#roadmap) for where the two muses go next. The Felucca documentation that
+laid the bridge ([MIDI OUT](#opquencer-m0)) so the FM-1 can drive eurorack through any MIDI-CV
+converter, and v0.2.0 brings the first controlled chance ([M1](#opquencer-m1)). See [Roadmap](#roadmap)
+for where the two muses go next. The Felucca documentation that
 follows still applies; where it says "Felucca", the device now says "OPQuencer".
 
-![OPQuencer v0.1.0 (top to bottom, left to right: boot splash, MENU > MIDI with OUT + TX channels, SEQ > DETAIL lanes, ABOUT)](docs/opquencer-0.1.0.png)
+![OPQuencer v0.2.0 (top to bottom, left to right: boot splash, MENU > MIDI with OUT + TX channels, SEQ > CHANCE, ABOUT)](docs/opquencer-0.2.0.png)
 
-**TL;DR:** OPQuencer v0.1.0 is Felucca 1.5.1 plus [MIDI OUT](#opquencer-m0): the sequencer, the
+**TL;DR:** OPQuencer v0.2.0 is Felucca 1.5.1 plus [MIDI OUT](#opquencer-m0): the sequencer, the
 arpeggiator and ratchets go out over USB on a TX channel per track — straight into any MIDI-CV
-converter (eurorack), drum machine or DAW. Build it ([BUILDING.md](BUILDING.md)) and install from
+converter (eurorack), drum machine or DAW — plus [controlled chance](#opquencer-m1): per-track CV
+variation and ratchet probability/feel on SEQ > CHANCE. Build it ([BUILDING.md](BUILDING.md)) and install from
 [Install](#install) below; no extra hardware is needed. Installing is at your own risk: M-VAVE's
-updater or the installer's **Return to official V15** takes you back. Coming from Felucca 1.5.x?
+updater or the installer's **Return to official V15** takes you back. Coming from Felucca 1.5.x or
+OPQuencer v0.1.0?
 Everything carries over both ways: same projects, presets, backups, editor protocol and update path
 (same formats, same package identity, same USB descriptors but the product string).
 Coming from Felucca 1.1.5.x or going back to 1.2–1.4.1? The base firmware's notes still apply:
@@ -44,6 +47,24 @@ or a host box) and DAWs, all standard MIDI over USB, no converter-specific code:
   Felucca 1.5.1: projects, backups and the web editor carry over (the editor shows the new OUT mode
   under its globals; TX channels are menu-only for now).
 
+## OPQuencer M1
+
+Controlled chance, Eloquencer-style, at track level (SEQ > CHANCE, between DETAIL and AUTOMATION) —
+four sound parameters, so they ride presets, projects, automation and locks:
+
+- **CV-P / CV-R:** pitch variation probability (0–100 %) and range (0–12 semitones). Rolled once per
+  pass: one delta for the step's notes, snapped to the track's scale (chromatic passes through); drum
+  lane hits never vary. STEP PREVIEW sounds the step as written.
+- **RT-P / RT-T:** ratchet probability (0 = the ratchet always plays as set, else the repeats may stay
+  home and the step plays x1) and feel: EQUAL parts as before, PUSH a long first part, DRAG a long
+  last part (x3 EQUAL already feels triplet).
+- A step's **locks** of the four shape the roll (hold a step on CHANCE, turn a knob); SEQ > AUTOMATION
+  lists them; SAVE held undoes them. MIDI OUT carries the varied notes and every trigger.
+- Storage: the four take FUN10's last spare — no format-size change (P_COUNT 115). Old projects load
+  them OFF; projects saved here show EMPTY on Felucca 1.5.1 and older (as 1.5's did on 1.4.1).
+  Per-step gate length needs per-step bytes the flash has no room for: approximate it today with note
+  LEN ties and GATE locks, and see the Roadmap for the full story.
+
 ## Roadmap
 
 The FM-1 hardware is fixed (27 keys, KNOB 1–4 plus SELECT / ALGORITHM / PRESETS, a 240×240 screen,
@@ -55,11 +76,13 @@ never cloned:
   Tombola, Pattern) as generative writers into the 64 steps; the SONG chain as tape sections with loop
   braces; the FX layer as tape tricks (reverse, half-speed, tape stop); punch-in mutes/solos in the GLO
   mixer. Not coming: minutes-long linear tape (no memory for it), FM radio, tilt.
-- **Eloquencer-style sequencer:** M0 ships gate chance; next is controlled chance on the rest — pitch
-  (CV) variation probability + range, gate-length variation, ratchet probability and duplet/triplet
-  types — then pattern banks with variations, FILL, track SHIFT, and per-track step directions and clock
-  dividers. SEQ > DETAIL's four lanes are the home for all of it. Not coming: real CV/Gate jacks —
-  USB MIDI plus a host-capable converter (FH-2, Shuttle Control, host box) is the bridge.
+- **Eloquencer-style sequencer:** v0.1.0 shipped gate chance; v0.2.0 ([M1](#opquencer-m1)) adds
+  CV variation probability + range and ratchet probability + PUSH/DRAG feels on SEQ > CHANCE, with
+  locks per step. Next: pattern banks with variations, FILL, track SHIFT, per-track step directions
+  and clock dividers. Per-step gate length needs per-step bytes the 4 KB project objects have no room
+  for (the store is exactly full; no free flash sector exists) — it waits on a storage redesign, or
+  rides today's LEN ties and GATE locks. SEQ > DETAIL's lanes remain the home for per-step values.
+  Not coming: real CV/Gate jacks — USB MIDI plus a host-capable converter is the bridge.
 - **Deeper SLOOP merge (optional):** M0 adapts SLOOP's MIDI OUT design; SLOOP's live workflow
   (free-tempo REC, fills, quick chain, 27 punch-ins, TEXTURE bed, per-track channels as settings) can
   follow piece by piece, each behind the same no-format-break rule.

@@ -71,6 +71,12 @@ enum {                          /* per-track parameters */
     P_ITYPE, P_IA, P_IB, P_IC, P_IMIX,         /* 1.5 (#78, #177): the INSERT, its TYPE, three values and MIX (fx.c) */
     P_FTYPE,                                   /* 1.5 (#104): ANALOG's filter TYPE, LP (as before) / BP / HP (eng_analog.c) */
     P_ESYNC,                                   /* 1.5 (#175): ENV SYNC: ATK DEC REL as note values of the tempo (voice.c) */
+    P_CVVP, P_CVVR, P_RTPR, P_RTTY,            /* OPQuencer M1: controlled chance (Eloquencer-style, track-level): CV
+                                                * (pitch) variation probability (0..100 %, 0 = off, as before) and
+                                                * range (0..12 semitones), ratchet probability (0..100 %, 0 = the
+                                                * ratchet always plays as set) and type (STRAIGHT as before, PUSH,
+                                                * DRAG: seq.c). New common parameters go just before P_E0 (user presets
+                                                * and projects map by count); they take the last of FUN10's spare */
     P_E0, P_E1, P_E2, P_E3, P_E4, P_E5, P_E6, P_E7,
     P_COUNT
 };
@@ -356,7 +362,7 @@ typedef struct track {
     int32_t dist_hp, dist_lp1, dist_lp2;   /* DIST insert state (fx.c) */
     uint8_t tail;                /* blocks to mix after the last voice (the DIST / INSERT tail) */
     uint8_t ins_run;             /* the INSERT still sounds (fx.c track_insert: its wet share above 0) */
-    uint8_t rsv_sz[15];          /* (sizeof(track_t) a multiple of 16: below) */
+    uint8_t rsv_sz[23];          /* (sizeof(track_t) a multiple of 16: below; M1's 4 params took 8 of it) */
     int16_t armp, aholdp;        /* P_AMODE / P_AHOLD as last seen by the ISR */
     /* engine switch (voice.c engine_block): the old engine's voices fade out, then it switches */
     uint8_t xf_on, xf;           /* fading; blocks of the fade still to render */

@@ -54,6 +54,9 @@ static const char *const N_CLOCK[] = {"INT", "USB", "TRS"};
 static const char *const N_MOUT[] = {"KEYS", "SEQ"};
 static const char *const N_TXCH[] = {"FOLLOW", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
                                      "13", "14", "15", "16", "OFF"};
+/* OPQuencer M1: the ratchet's feel (RTTY, seq.c ratch_bound): STRAIGHT equal parts as before, PUSH a long
+ * first part with a tight tail, DRAG a tight head with a long last part (x3 STRAIGHT already feels triplet) */
+static const char *const N_RTTY[] = {"EQUAL", "PUSH", "DRAG"};
 /* MIDI IN (seq.c midi_base): 1..4 -> parts, 5..16 ignored / all -> selected / (1.2, append-only) 5..8, 9..12, 13..16 -> parts */
 static const char *const N_ROUTE[] = {"CH1-4", "SEL", "CH5-8", "CH9-12", "CH13-16"};
 static const char *const N_NOTE[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
@@ -169,6 +172,11 @@ static const param_desc_t TP[P_COUNT] = {
     [P_IMIX] = PD("MIX", F_PCT, 0, 127, 127),
     [P_FTYPE] = PE("TYPE", N_FTYPE, 0),           /* 1.5 (#104): ANALOG's filter, LP = as before (eng_analog.c) */
     [P_ESYNC] = PE("ESYNC", N_ONOFF, 0),          /* 1.5 (#175): OFF = ATK DEC REL in ms, as before (voice.c esync) */
+    /* OPQuencer M1: controlled chance (core.h). Defaults 0: everything plays as before */
+    [P_CVVP] = PD("CV-P", F_PCT, 0, 100, 0),      /* CV (pitch) variation probability */
+    [P_CVVR] = PD("CV-R", F_INT, 0, 12, 0),       /* .. range in semitones (snapped to the track's scale as it plays) */
+    [P_RTPR] = PD("RT-P", F_PCT, 0, 100, 0),      /* ratchet probability: the repeats fire (else the step plays x1) */
+    [P_RTTY] = PE("RT-T", N_RTTY, 0),             /* .. feel (seq.c ratch_bound) */
 };
 
 /* the INSERT's A B C as its TYPE means them (TP's ranges and defaults): the drives DRIVE TONE LEVEL, CRUSH BITS RATE
@@ -498,6 +506,8 @@ static const page_t PAGES[] = {
     {"STEP", FAM_SEQ, SC_STEP, GR_ROLL, {0, 1, 2, 3}},
     {"DETAIL", FAM_SEQ, SC_STEP, GR_ROLL, {0, 1, 2, 3}},   /* 1.5.1 (#199): the cursor step's CHANCE RATCH NUDGE VEL
                                                              * (ui.c detail_on, ui_input.c sd_turn) */
+    {"CHANCE", FAM_SEQ, SC_TRACK, GR_ROLL, {P_CVVP, P_CVVR, P_RTPR, P_RTTY}},   /* OPQuencer M1: the track's controlled
+                                                             * chance (a sound page like ARP's: knobs, locks, automation) */
     {"AUTOMATION", FAM_SEQ, SC_TRACK, GR_EVENTS, {0xFF, 0xFF, 0xFF, 0xFF}},  /* the locks, events, CHANCE and RATCH as a
                                                                              * list, PLAY and CLEAR (ui_events.c) */
     /* HOME's pages (1.2): HOME tapped on HOME the MIXER (up to 1.1.5 GLO's; LEVEL PAN REV MUTE), again CLOCK (up to 1.1.5

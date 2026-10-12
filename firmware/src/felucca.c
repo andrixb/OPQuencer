@@ -32,7 +32,7 @@
 #define FELUCCA_ID "FM-1_900"    /* package identity (build.py: the .fwsc marker string) */
 #endif
 #ifndef FELUCCA_VERSION
-#define FELUCCA_VERSION "v0.1.0" /* OPQuencer (firmware based on Felucca 1.5.1): shown in the menu, the console and
+#define FELUCCA_VERSION "v0.2.0" /* OPQuencer (firmware based on Felucca 1.5.1): shown in the menu, the console and
                                    * the editor; build.py --release X.Y. The FELUCCA_* build flags, the package
                                    * identity FELUCCA_ID and the update path stay as they are, so Felucca's loader,
                                    * installer and editor keep working with OPQuencer builds */

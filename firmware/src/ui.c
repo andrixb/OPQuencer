@@ -555,6 +555,13 @@ static int detail_on(void)
 {
     return !ui.home && !ui.menu && !ui.confirm && cur_page()->scope == SC_STEP && str_eq(cur_page()->title, "DETAIL");
 }
+/* SEQ > CHANCE (OPQuencer M1; params.c, between DETAIL and AUTOMATION): the track's controlled chance
+ * (P_CVVP .. P_RTTY) on the knobs, over the steps as STEP (a sound page: knob turns, locks, automation).
+ * No state of its own: the page is what says so */
+static int chance_on(void)
+{
+    return !ui.home && !ui.menu && !ui.confirm && str_eq(cur_page()->title, "CHANCE");
+}
 /* GLO > SONG (1.2): the white keys A B C D (A3 B3 C4 D4, white places 2..5: seq.c song_key) set the selected cell's slot;
  * they do not sound there, the other keys play as anywhere (seq.c keyboard_block: song.grid 3) */
 static int song_keys_on(void) { return !ui.home && !ui.menu && !ui.confirm && !ui.layer && cur_page()->graph == GR_SONG; }

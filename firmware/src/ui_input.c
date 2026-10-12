@@ -1230,6 +1230,8 @@ static void presets_turn(int32_t s)
     }
     if (ui.home || g == GR_BROWSE) {
         preset_step(s);
+    } else if (chance_on()) {                             /* CHANCE (OPQuencer M1): a sound page over the steps; */
+        preset_step(s);                                   /* PRESETS browses sounds, KNOB 1..4 the chance */
     } else if (g == GR_ROLL || g == GR_USER || g == GR_SLOTS || g == GR_PATS || g == GR_SONG || g == GR_EVENTS) {
         edit_param(0, s);                                 /* KNOB 1's (STEP: STOP TO EDIT while a song plays) */
         ui.hot_col = 0;
